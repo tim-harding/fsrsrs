@@ -1,7 +1,7 @@
 use crate::Seed;
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
-pub struct Alea {
+struct Alea {
     c: f64,
     s0: f64,
     s1: f64,
