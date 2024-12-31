@@ -61,6 +61,21 @@ impl Parameters {
         stability * f64::exp(self.w[17] * (rating_int as f64 - 3.0 + self.w[18]))
     }
 
+    pub fn next_stability(
+        &self,
+        difficulty: f64,
+        stability: f64,
+        retrievability: f64,
+        rating: Rating,
+    ) -> f64 {
+        match rating {
+            Rating::Again => self.next_forget_stability(difficulty, stability, retrievability),
+            Rating::Hard | Rating::Good | Rating::Easy => {
+                self.next_recall_stability(difficulty, stability, retrievability, rating)
+            }
+        }
+    }
+
     pub fn next_recall_stability(
         &self,
         difficulty: f64,

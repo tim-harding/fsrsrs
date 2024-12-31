@@ -132,15 +132,28 @@ impl Basic {
         let mut next_good = next;
         let mut next_easy = next;
 
-        self.next_difficulty_stability(
-            &mut next_again,
-            &mut next_hard,
-            &mut next_good,
-            &mut next_easy,
-            difficulty,
-            stability,
-            retrievability,
-        );
+        next_again.difficulty = self.0.parameters.next_difficulty(difficulty, Again);
+        next_hard.difficulty = self.0.parameters.next_difficulty(difficulty, Hard);
+        next_good.difficulty = self.0.parameters.next_difficulty(difficulty, Good);
+        next_easy.difficulty = self.0.parameters.next_difficulty(difficulty, Easy);
+
+        next_again.stability =
+            self.0
+                .parameters
+                .next_stability(difficulty, stability, retrievability, Again);
+        next_hard.stability =
+            self.0
+                .parameters
+                .next_stability(difficulty, stability, retrievability, Hard);
+        next_good.stability =
+            self.0
+                .parameters
+                .next_stability(difficulty, stability, retrievability, Good);
+        next_easy.stability =
+            self.0
+                .parameters
+                .next_stability(difficulty, stability, retrievability, Easy);
+
         self.next_interval(
             &mut next_again,
             &mut next_hard,
@@ -177,42 +190,6 @@ impl Basic {
         self.0.next.insert(Easy, item_easy);
 
         self.0.next.get(&rating).unwrap().to_owned()
-    }
-
-    #[allow(clippy::too_many_arguments)]
-    fn next_difficulty_stability(
-        &self,
-        next_again: &mut Card,
-        next_hard: &mut Card,
-        next_good: &mut Card,
-        next_easy: &mut Card,
-        difficulty: f64,
-        stability: f64,
-        retrievability: f64,
-    ) {
-        next_again.difficulty = self.0.parameters.next_difficulty(difficulty, Again);
-        next_again.stability =
-            self.0
-                .parameters
-                .next_forget_stability(difficulty, stability, retrievability);
-
-        next_hard.difficulty = self.0.parameters.next_difficulty(difficulty, Hard);
-        next_hard.stability =
-            self.0
-                .parameters
-                .next_recall_stability(difficulty, stability, retrievability, Hard);
-
-        next_good.difficulty = self.0.parameters.next_difficulty(difficulty, Good);
-        next_good.stability =
-            self.0
-                .parameters
-                .next_recall_stability(difficulty, stability, retrievability, Good);
-
-        next_easy.difficulty = self.0.parameters.next_difficulty(difficulty, Easy);
-        next_easy.stability =
-            self.0
-                .parameters
-                .next_recall_stability(difficulty, stability, retrievability, Easy);
     }
 
     fn next_interval(
