@@ -1,4 +1,4 @@
-use crate::{models::State::*, Card, Parameters, Rating, ReviewLog};
+use crate::{models::State::*, Card, Parameters, Rating, Review};
 use chrono::{DateTime, Utc};
 
 #[derive(Debug, Clone)]
@@ -28,8 +28,8 @@ impl Base {
         scheduler
     }
 
-    pub const fn build_log(&self, rating: Rating) -> ReviewLog {
-        ReviewLog {
+    pub const fn build_log(&self, rating: Rating) -> Review {
+        Review {
             rating,
             state: self.current.state,
             elapsed_days: self.current.elapsed_days,

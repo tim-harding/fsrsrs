@@ -53,7 +53,7 @@ impl Rating {
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ReviewLog {
+pub struct Review {
     pub rating: Rating,
     pub elapsed_days: i64,
     pub scheduled_days: i64,
@@ -64,7 +64,7 @@ pub struct ReviewLog {
 #[derive(Debug, Clone)]
 pub struct SchedulingInfo {
     pub card: Card,
-    pub review_log: ReviewLog,
+    pub review_log: Review,
 }
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
