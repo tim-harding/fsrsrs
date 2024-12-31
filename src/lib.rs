@@ -5,8 +5,8 @@ mod tests;
 mod scheduler;
 pub use scheduler::Scheduler;
 
-mod algo;
-pub use algo::Fsrs;
+mod fsrs;
+pub use fsrs::Fsrs;
 
 mod models;
 pub use models::{Card, Rating, RecordLog, ReviewLog, SchedulingInfo, State};

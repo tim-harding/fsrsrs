@@ -1,7 +1,7 @@
 #![cfg(test)]
 
 use crate::{
-    algo::Fsrs,
+    fsrs::Fsrs,
     models::{Card, Rating},
     parameters::Parameters,
     State,
