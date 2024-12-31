@@ -1,28 +1,26 @@
-use crate::{fuzz_range::FuzzRange, prng::Prng, Rating};
-use std::time::Instant;
+use crate::{fuzz_range::FuzzRange, prng::Prng, ParametersBuilder, Rating};
 
-type Weights = [f64; 19];
-const DEFAULT_WEIGHTS: Weights = [
-    0.4072, 1.1829, 3.1262, 15.4722, 7.2102, 0.5316, 1.0651, 0.0234, 1.616, 0.1544, 1.0824, 1.9813,
-    0.0953, 0.2975, 2.2042, 0.2407, 2.9466, 0.5034, 0.6567,
-];
+pub type Weights = [f64; 19];
 
 #[derive(Debug, Clone)]
 pub struct Parameters {
-    pub request_retention: f64,
-    pub maximum_interval: i32,
-    pub w: Weights,
-    pub decay: f64,
-    pub factor: f64,
-    pub enable_short_term: bool,
-    pub enable_fuzz: bool,
-    pub seed: String,
+    pub(crate) request_retention: f64,
+    pub(crate) maximum_interval: i32,
+    pub(crate) w: Weights,
+    pub(crate) decay: f64,
+    pub(crate) factor: f64,
+    pub(crate) enable_short_term: bool,
+    pub(crate) enable_fuzz: bool,
+    pub(crate) seed: String,
 }
 
 impl Parameters {
-    pub const DECAY: f64 = -0.5;
-    /// (9/10) ^ (1 / DECAY) - 1
-    pub const FACTOR: f64 = 19f64 / 81f64;
+    pub(crate) const DECAY: f64 = -0.5;
+    pub(crate) const FACTOR: f64 = 19f64 / 81f64; // (9/10) ^ (1 / DECAY) - 1
+    pub(crate) const WEIGHTS: Weights = [
+        0.4072, 1.1829, 3.1262, 15.4722, 7.2102, 0.5316, 1.0651, 0.0234, 1.616, 0.1544, 1.0824,
+        1.9813, 0.0953, 0.2975, 2.2042, 0.2407, 2.9466, 0.5034, 0.6567,
+    ];
 
     pub fn forgetting_curve(elapsed_days: f64, stability: f64) -> f64 {
         (1.0 + Self::FACTOR * elapsed_days / stability).powf(Self::DECAY)
@@ -132,15 +130,6 @@ impl Parameters {
 
 impl Default for Parameters {
     fn default() -> Self {
-        Self {
-            request_retention: 0.9,
-            maximum_interval: 36500,
-            w: DEFAULT_WEIGHTS,
-            decay: Self::DECAY,
-            factor: Self::FACTOR,
-            enable_short_term: true,
-            enable_fuzz: false,
-            seed: format!("{:?}", Instant::now()),
-        }
+        ParametersBuilder::new().build()
     }
 }
