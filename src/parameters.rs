@@ -1,5 +1,5 @@
-use crate::{alea, Rating};
-use chrono::Utc;
+use crate::{alea::Prng, Rating};
+use std::time::Instant;
 
 type Weights = [f64; 19];
 const DEFAULT_WEIGHTS: Weights = [
@@ -16,7 +16,7 @@ pub struct Parameters {
     pub factor: f64,
     pub enable_short_term: bool,
     pub enable_fuzz: bool,
-    pub seed: Seed,
+    pub seed: String,
 }
 
 impl Parameters {
@@ -103,7 +103,7 @@ impl Parameters {
             return interval;
         }
 
-        let mut generator = alea(self.seed.clone());
+        let mut generator = Prng::new(self.seed.as_str());
         let fuzz_factor = generator.double();
         let (min_interval, max_interval) =
             FuzzRange::get_fuzz_range(interval, elapsed_days, self.maximum_interval);
@@ -125,7 +125,7 @@ impl Default for Parameters {
             factor: Self::FACTOR,
             enable_short_term: true,
             enable_fuzz: false,
-            seed: Seed::default(),
+            seed: format!("{:?}", Instant::now()),
         }
     }
 }
@@ -167,67 +167,3 @@ const FUZZ_RANGE: [FuzzRange; 3] = [
     FuzzRange::new(7.0, 20.0, 0.1),
     FuzzRange::new(20.0, f64::MAX, 0.05),
 ];
-
-#[derive(Debug, Clone)]
-pub enum Seed {
-    String(String),
-    Empty,
-    Default,
-}
-
-impl Seed {
-    pub fn new<T>(value: T) -> Self
-    where
-        T: std::fmt::Display,
-    {
-        if value.to_string().is_empty() {
-            Self::default()
-        } else {
-            Self::String(value.to_string())
-        }
-    }
-
-    pub fn inner_str(&self) -> &str {
-        match self {
-            Self::String(str) => str,
-            Self::Empty => Self::Default.inner_str(),
-            Self::Default => Self::Default.inner_str(),
-        }
-    }
-}
-
-impl std::fmt::Display for Seed {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{}", self.inner_str())
-    }
-}
-
-impl From<&Seed> for String {
-    fn from(d: &Seed) -> Self {
-        d.inner_str().to_string()
-    }
-}
-
-impl From<i32> for Seed {
-    fn from(num: i32) -> Self {
-        Self::String(num.to_string())
-    }
-}
-
-impl From<String> for Seed {
-    fn from(s: String) -> Self {
-        Self::String(s)
-    }
-}
-
-impl<'a> From<&'a str> for Seed {
-    fn from(s: &'a str) -> Self {
-        Self::String(s.to_string())
-    }
-}
-
-impl Default for Seed {
-    fn default() -> Self {
-        Self::String(Utc::now().timestamp_millis().to_string())
-    }
-}

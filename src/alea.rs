@@ -1,5 +1,3 @@
-use crate::Seed;
-
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 struct Alea {
     c: f64,
@@ -9,14 +7,13 @@ struct Alea {
 }
 
 impl Alea {
-    fn new(seed: Seed) -> Self {
+    fn new(seed: &str) -> Self {
         let mut mash = Mash::new();
-        let blank_seed = Seed::new(" ");
         let mut alea = Self {
             c: 1.0,
-            s0: mash.mash(&blank_seed),
-            s1: mash.mash(&blank_seed),
-            s2: mash.mash(&blank_seed),
+            s0: mash.mash(" "),
+            s1: mash.mash(" "),
+            s2: mash.mash(" "),
         };
 
         alea.s0 -= mash.mash(&seed);
@@ -66,9 +63,9 @@ impl Mash {
         Self { n: Self::N as f64 }
     }
 
-    fn mash(&mut self, seed: &Seed) -> f64 {
+    fn mash(&mut self, seed: &str) -> f64 {
         let mut n: f64 = self.n;
-        for c in seed.inner_str().chars() {
+        for c in seed.chars() {
             n += c as u32 as f64;
             let mut h = 0.02519603282416938 * n;
             n = (h as u32) as f64;
@@ -85,11 +82,11 @@ impl Mash {
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct Prng {
-    pub xg: Alea,
+    xg: Alea,
 }
 
 impl Prng {
-    fn new(seed: Seed) -> Self {
+    pub fn new(seed: &str) -> Self {
         Self {
             xg: Alea::new(seed),
         }
@@ -99,6 +96,7 @@ impl Prng {
         self.xg.next().unwrap()
     }
 
+    #[allow(unused)]
     pub fn int32(&mut self) -> i32 {
         wrap_to_i32(self.gen_next() * TWO_TO_THE_POWER_OF_32 as f64)
     }
@@ -106,14 +104,6 @@ impl Prng {
     pub fn double(&mut self) -> f64 {
         ((self.gen_next() * TWO_TO_THE_POWER_OF_21 as f64) as u64 as f64)
             .mul_add(TWO_TO_THE_POWER_OF_MINUS_53, self.gen_next())
-    }
-
-    pub fn set_state(&mut self, xg: Alea) {
-        self.xg = xg;
-    }
-
-    pub fn state(self) -> Alea {
-        self.xg
     }
 }
 
@@ -123,29 +113,19 @@ fn wrap_to_i32(input: f64) -> i32 {
     input.rem_euclid((u32::MAX as f64) + 1.0) as u32 as i32
 }
 
-pub fn alea(seed: Seed) -> Prng {
-    match seed {
-        Seed::String(_) => Prng::new(seed),
-        Seed::Empty => Prng::new(Seed::default()),
-        Seed::Default => Prng::new(Seed::default()),
-    }
-}
-
 #[cfg(test)]
 mod tests {
-    use rand::Rng;
-
     use super::*;
 
     #[test]
     fn test_prng_get_state() {
-        let prng_1 = alea(Seed::new(1));
-        let prng_2 = alea(Seed::new(2));
-        let prng_3 = alea(Seed::new(1));
+        let prng_1 = Prng::new("1");
+        let prng_2 = Prng::new("2");
+        let prng_3 = Prng::new("1");
 
-        let alea_state_1 = prng_1.state();
-        let alea_state_2 = prng_2.state();
-        let alea_state_3 = prng_3.state();
+        let alea_state_1 = prng_1.xg;
+        let alea_state_2 = prng_2.xg;
+        let alea_state_3 = prng_3.xg;
 
         assert_eq!(alea_state_1, alea_state_3);
         assert_ne!(alea_state_1, alea_state_2);
@@ -153,8 +133,7 @@ mod tests {
 
     #[test]
     fn test_alea_get_next() {
-        let seed = Seed::new(12345);
-        let mut generator = alea(seed);
+        let mut generator = Prng::new("12345");
         assert_eq!(generator.gen_next(), 0.27138191112317145);
         assert_eq!(generator.gen_next(), 0.19615925149992108);
         assert_eq!(generator.gen_next(), 0.6810678059700876);
@@ -162,8 +141,7 @@ mod tests {
 
     #[test]
     fn test_alea_int32() {
-        let seed = Seed::new(12345);
-        let mut generator = alea(seed);
+        let mut generator = Prng::new("12345");
         assert_eq!(generator.int32(), 1165576433);
         assert_eq!(generator.int32(), 842497570);
         assert_eq!(generator.int32(), -1369803343);
@@ -171,16 +149,15 @@ mod tests {
 
     #[test]
     fn test_alea_import_state() {
-        let mut rng = rand::thread_rng();
-        let mut prng_1 = alea(Seed::new(rng.gen::<i32>()));
+        let mut prng_1 = Prng::new("Whatever");
         prng_1.gen_next();
         prng_1.gen_next();
         prng_1.gen_next();
-        let prng_1_state = prng_1.state();
-        let mut prng_2 = alea(Seed::Empty);
-        prng_2.set_state(prng_1_state);
+        let prng_1_state = prng_1.xg;
+        let mut prng_2 = Prng::new("ASDF");
+        prng_2.xg = prng_1_state;
 
-        assert_eq!(prng_1.state(), prng_2.state());
+        assert_eq!(prng_1.xg, prng_2.xg);
 
         for _ in 1..10000 {
             let a = prng_1.gen_next();
@@ -194,10 +171,9 @@ mod tests {
 
     #[test]
     fn test_seed_example_1() {
-        let seed = Seed::new("1727015666066");
-        let mut generator = alea(seed);
+        let mut generator = Prng::new("1727015666066");
         let results = generator.gen_next();
-        let state = generator.state();
+        let state = generator.xg;
 
         let expect_alea_state = Alea {
             c: 1828249.0,
@@ -211,10 +187,9 @@ mod tests {
 
     #[test]
     fn test_seed_example_2() {
-        let seed = Seed::new("Seedp5fxh9kf4r0");
-        let mut generator = alea(seed);
+        let mut generator = Prng::new("Seedp5fxh9kf4r0");
         let results = generator.gen_next();
-        let state = generator.state();
+        let state = generator.xg;
 
         let expect_alea_state = Alea {
             c: 1776946.0,
@@ -228,10 +203,9 @@ mod tests {
 
     #[test]
     fn test_seed_example_3() {
-        let seed = Seed::new("NegativeS2Seed");
-        let mut generator = alea(seed);
+        let mut generator = Prng::new("NegativeS2Seed");
         let results = generator.gen_next();
-        let state = generator.state();
+        let state = generator.xg;
 
         let expect_alea_state = Alea {
             c: 952982.0,

@@ -1,6 +1,6 @@
 use crate::{
     models::{RecordLog, SchedulingInfo, State::*},
-    Card, Parameters, Rating, ReviewLog, Seed,
+    Card, Parameters, Rating, ReviewLog,
 };
 use chrono::{DateTime, Utc};
 
@@ -48,7 +48,7 @@ impl Scheduler {
         let time = self.now.timestamp_millis();
         let reps = self.current.reps;
         let mul = self.current.difficulty * self.current.stability;
-        self.parameters.seed = Seed::new(format!("{}_{}_{}", time, reps, mul));
+        self.parameters.seed = format!("{}_{}_{}", time, reps, mul);
     }
 }
 
