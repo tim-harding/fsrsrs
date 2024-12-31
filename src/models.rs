@@ -1,6 +1,5 @@
 use crate::Parameters;
 use chrono::{DateTime, Utc};
-use std::collections::HashMap;
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Default)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -77,5 +76,3 @@ pub enum State {
     Review = 2,
     Relearning = 3,
 }
-
-pub type RecordLog = HashMap<Rating, SchedulingInfo>;

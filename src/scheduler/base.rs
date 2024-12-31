@@ -1,7 +1,4 @@
-use crate::{
-    models::{RecordLog, State::*},
-    Card, Parameters, Rating, ReviewLog,
-};
+use crate::{models::State::*, Card, Parameters, Rating, ReviewLog};
 use chrono::{DateTime, Utc};
 
 #[derive(Debug, Clone)]
@@ -10,7 +7,6 @@ pub struct Base {
     pub last: Card,
     pub current: Card,
     pub now: DateTime<Utc>,
-    pub next: RecordLog,
 }
 
 impl Base {
@@ -27,10 +23,8 @@ impl Base {
             last: card,
             current: current_card,
             now,
-            next: RecordLog::new(),
         };
         scheduler.init_seed();
-
         scheduler
     }
 

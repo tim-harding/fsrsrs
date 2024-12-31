@@ -2,7 +2,7 @@ mod base;
 mod basic;
 mod longterm;
 
-use crate::{Card, Parameters, Rating, RecordLog, SchedulingInfo};
+use crate::{Card, Parameters, Rating, SchedulingInfo};
 use basic::Basic;
 use chrono::{DateTime, Utc};
 use longterm::Longterm;
@@ -16,12 +16,6 @@ impl Scheduler {
         } else {
             Inner::Longterm(Longterm::new(parameters, card, now))
         })
-    }
-
-    pub fn preview(&mut self) -> RecordLog {
-        Rating::iter_variants()
-            .map(|rating| (rating, self.review(rating)))
-            .collect()
     }
 
     pub fn review(&mut self, rating: Rating) -> SchedulingInfo {

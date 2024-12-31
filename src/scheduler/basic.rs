@@ -14,11 +14,7 @@ impl Basic {
         Self(Base::new(parameters, card, now))
     }
 
-    fn new_state(&mut self, rating: Rating) -> SchedulingInfo {
-        if let Some(exist) = self.0.next.get(&rating) {
-            return exist.clone();
-        }
-
+    fn new_state(&self, rating: Rating) -> SchedulingInfo {
         let mut next = self.0.current;
         next.difficulty = self.0.parameters.init_difficulty(rating);
         next.stability = self.0.parameters.init_stability(rating);
@@ -49,20 +45,14 @@ impl Basic {
                 next.state = Review;
             }
         };
-        let item = SchedulingInfo {
+
+        SchedulingInfo {
             card: next,
             review_log: self.0.build_log(rating),
-        };
-
-        self.0.next.insert(rating, item.clone());
-        item
+        }
     }
 
     fn learning_state(&mut self, rating: Rating) -> SchedulingInfo {
-        if let Some(exist) = self.0.next.get(&rating) {
-            return exist.clone();
-        }
-
         let mut next = self.0.current;
         let interval = self.0.current.elapsed_days;
         next.difficulty = self
@@ -107,20 +97,14 @@ impl Basic {
                 next.state = Review;
             }
         }
-        let item = SchedulingInfo {
+
+        SchedulingInfo {
             card: next,
             review_log: self.0.build_log(rating),
-        };
-
-        self.0.next.insert(rating, item.clone());
-        item
+        }
     }
 
     fn review_state(&mut self, rating: Rating) -> SchedulingInfo {
-        if let Some(exist) = self.0.next.get(&rating) {
-            return exist.clone();
-        }
-
         let next = self.0.current;
         let interval = self.0.current.elapsed_days;
         let stability = self.0.last.stability;
@@ -205,12 +189,12 @@ impl Basic {
             review_log: self.0.build_log(Easy),
         };
 
-        self.0.next.insert(Again, item_again);
-        self.0.next.insert(Hard, item_hard);
-        self.0.next.insert(Good, item_good);
-        self.0.next.insert(Easy, item_easy);
-
-        self.0.next.get(&rating).unwrap().to_owned()
+        match rating {
+            Again => item_again,
+            Hard => item_hard,
+            Good => item_good,
+            Easy => item_easy,
+        }
     }
 
     fn next_state(rating: Rating) -> State {

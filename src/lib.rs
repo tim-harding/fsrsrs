@@ -8,7 +8,7 @@ mod fsrs;
 pub use fsrs::Fsrs;
 
 mod models;
-pub use models::{Card, Rating, RecordLog, ReviewLog, SchedulingInfo, State};
+pub use models::{Card, Rating, ReviewLog, SchedulingInfo, State};
 
 mod parameters;
 pub use parameters::Parameters;

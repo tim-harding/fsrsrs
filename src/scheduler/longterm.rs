@@ -15,10 +15,6 @@ impl Longterm {
     }
 
     fn new_state(&mut self, rating: Rating) -> SchedulingInfo {
-        if let Some(exist) = self.0.next.get(&rating) {
-            return exist.clone();
-        }
-
         let next = self.0.current;
         self.0.current.scheduled_days = 0;
         self.0.current.elapsed_days = 0;
@@ -47,9 +43,30 @@ impl Longterm {
             &mut next_good,
             &mut next_easy,
         );
-        self.update_next(&next_again, &next_hard, &next_good, &next_easy);
 
-        self.0.next.get(&rating).unwrap().to_owned()
+        let item_again = SchedulingInfo {
+            card: next_again,
+            review_log: self.0.build_log(Again),
+        };
+        let item_hard = SchedulingInfo {
+            card: next_hard,
+            review_log: self.0.build_log(Hard),
+        };
+        let item_good = SchedulingInfo {
+            card: next_good,
+            review_log: self.0.build_log(Good),
+        };
+        let item_easy = SchedulingInfo {
+            card: next_easy,
+            review_log: self.0.build_log(Easy),
+        };
+
+        match rating {
+            Again => item_again,
+            Hard => item_hard,
+            Good => item_good,
+            Easy => item_easy,
+        }
     }
 
     fn learning_state(&mut self, rating: Rating) -> SchedulingInfo {
@@ -57,10 +74,6 @@ impl Longterm {
     }
 
     fn review_state(&mut self, rating: Rating) -> SchedulingInfo {
-        if let Some(exist) = self.0.next.get(&rating) {
-            return exist.clone();
-        }
-
         let next = self.0.current;
         let interval = self.0.current.elapsed_days;
         let stability = self.0.last.stability;
@@ -96,8 +109,29 @@ impl Longterm {
         );
         next_again.lapses += 1;
 
-        self.update_next(&next_again, &next_hard, &next_good, &next_easy);
-        self.0.next.get(&rating).unwrap().to_owned()
+        let item_again = SchedulingInfo {
+            card: next_again,
+            review_log: self.0.build_log(Again),
+        };
+        let item_hard = SchedulingInfo {
+            card: next_hard,
+            review_log: self.0.build_log(Hard),
+        };
+        let item_good = SchedulingInfo {
+            card: next_good,
+            review_log: self.0.build_log(Good),
+        };
+        let item_easy = SchedulingInfo {
+            card: next_easy,
+            review_log: self.0.build_log(Easy),
+        };
+
+        match rating {
+            Again => item_again,
+            Hard => item_hard,
+            Good => item_good,
+            Easy => item_easy,
+        }
     }
 
     fn init_difficulty_stability(
@@ -210,36 +244,6 @@ impl Longterm {
         next_hard.state = Review;
         next_good.state = Review;
         next_easy.state = Review;
-    }
-
-    fn update_next(
-        &mut self,
-        next_again: &Card,
-        next_hard: &Card,
-        next_good: &Card,
-        next_easy: &Card,
-    ) {
-        let item_again = SchedulingInfo {
-            card: *next_again,
-            review_log: self.0.build_log(Again),
-        };
-        let item_hard = SchedulingInfo {
-            card: *next_hard,
-            review_log: self.0.build_log(Hard),
-        };
-        let item_good = SchedulingInfo {
-            card: *next_good,
-            review_log: self.0.build_log(Good),
-        };
-        let item_easy = SchedulingInfo {
-            card: *next_easy,
-            review_log: self.0.build_log(Easy),
-        };
-
-        self.0.next.insert(Again, item_again);
-        self.0.next.insert(Hard, item_hard);
-        self.0.next.insert(Good, item_good);
-        self.0.next.insert(Easy, item_easy);
     }
 
     pub fn review(&mut self, rating: Rating) -> SchedulingInfo {
