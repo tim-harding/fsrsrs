@@ -68,7 +68,7 @@ impl Card {
         }
     }
 
-    pub fn get_retrievability(&self, now: DateTime<Utc>) -> f64 {
+    pub fn retrievability(&self, now: DateTime<Utc>) -> f64 {
         match self.state {
             State::New => 0.0,
             _ => {

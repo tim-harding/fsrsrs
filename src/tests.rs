@@ -280,7 +280,7 @@ fn test_get_retrievability() {
 
     for (i, rating) in Rating::iter_variants().enumerate() {
         let card = scheduler.get(rating).unwrap().card.clone();
-        let retrievability = card.get_retrievability(card.due);
+        let retrievability = card.retrievability(card.due);
 
         assert_eq!(retrievability.round_float(7), expect_retrievability[i]);
     }
