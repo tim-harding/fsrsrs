@@ -1,16 +1,14 @@
-#[cfg(test)]
-use {
-    crate::{
-        alea::{alea, AleaState},
-        algo::Fsrs,
-        models::{Card, Rating, State},
-        parameters::{Parameters, Seed},
-    },
-    chrono::{DateTime, Duration, TimeZone, Utc},
-    rand::Rng,
-};
+#![cfg(test)]
 
-#[cfg(test)]
+use crate::{
+    alea::{alea, AleaState},
+    algo::Fsrs,
+    models::{Card, Rating, State},
+    parameters::{Parameters, Seed},
+};
+use chrono::{DateTime, Duration, TimeZone, Utc};
+use rand::Rng;
+
 static TEST_RATINGS: [Rating; 13] = [
     Rating::Good,
     Rating::Good,
@@ -27,22 +25,20 @@ static TEST_RATINGS: [Rating; 13] = [
     Rating::Good,
 ];
 
-#[cfg(test)]
 static WEIGHTS: [f64; 19] = [
     0.4197, 1.1869, 3.0412, 15.2441, 7.1434, 0.6477, 1.0007, 0.0674, 1.6597, 0.1712, 1.1178,
     2.0225, 0.0904, 0.3025, 2.1214, 0.2498, 2.9466, 0.4891, 0.6468,
 ];
 
-#[cfg(test)]
 fn string_to_utc(date_string: &str) -> DateTime<Utc> {
     let datetime = DateTime::parse_from_str(date_string, "%Y-%m-%d %H:%M:%S %z %Z").unwrap();
     Utc.from_local_datetime(&datetime.naive_utc()).unwrap()
 }
-#[cfg(test)]
+
 trait RoundFloat {
     fn round_float(self, precision: i32) -> f64;
 }
-#[cfg(test)]
+
 impl RoundFloat for f64 {
     fn round_float(self, precision: i32) -> f64 {
         let multiplier = 10.0_f64.powi(precision);

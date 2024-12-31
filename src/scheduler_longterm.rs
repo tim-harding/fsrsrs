@@ -1,7 +1,10 @@
+use crate::{
+    Card, ImplScheduler, Parameters,
+    Rating::{self, *},
+    Scheduler, SchedulingInfo,
+    State::*,
+};
 use chrono::{DateTime, Duration, Utc};
-
-use crate::{Card, ImplScheduler, Parameters, Rating, Scheduler, SchedulingInfo};
-use crate::{Rating::*, State::*};
 
 pub struct LongtermScheduler {
     scheduler: Scheduler,

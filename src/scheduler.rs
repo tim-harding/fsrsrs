@@ -1,11 +1,8 @@
-use chrono::{DateTime, Utc};
-
-use crate::models::State::*;
-use crate::Seed;
 use crate::{
-    models::{RecordLog, SchedulingInfo},
-    Card, Parameters, Rating, ReviewLog,
+    models::{RecordLog, SchedulingInfo, State::*},
+    Card, Parameters, Rating, ReviewLog, Seed,
 };
+use chrono::{DateTime, Utc};
 
 #[derive(Debug, Clone)]
 pub struct Scheduler {

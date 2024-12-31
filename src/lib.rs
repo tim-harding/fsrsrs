@@ -1,4 +1,5 @@
 #![deny(warnings)]
+
 mod algo;
 pub use algo::Fsrs;
 
