@@ -240,17 +240,17 @@ impl Longterm {
         next_good: &mut Card,
         next_easy: &mut Card,
     ) {
-        next_again.state = Review;
-        next_hard.state = Review;
-        next_good.state = Review;
-        next_easy.state = Review;
+        next_again.state = Reviewing;
+        next_hard.state = Reviewing;
+        next_good.state = Reviewing;
+        next_easy.state = Reviewing;
     }
 
     pub fn review(&mut self, rating: Rating) -> Schedule {
         match self.0.last.state {
             New => self.new_state(rating),
             Learning | Relearning => self.learning_state(rating),
-            Review => self.review_state(rating),
+            Reviewing => self.review_state(rating),
         }
     }
 }

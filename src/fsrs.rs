@@ -101,8 +101,8 @@ mod tests {
         }
         use State::*;
         let expected = [
-            New, Learning, Review, Review, Review, Review, Review, Relearning, Relearning, Review,
-            Review, Review, Review,
+            New, Learning, Reviewing, Reviewing, Reviewing, Reviewing, Reviewing, Relearning,
+            Relearning, Reviewing, Reviewing, Reviewing, Reviewing,
         ];
         assert_eq!(state_list, expected);
     }

@@ -3,7 +3,7 @@ use crate::{
     cards::Cards,
     Card, Parameters,
     Rating::{self, *},
-    Schedule,
+    Review, Schedule,
     State::{self, *},
 };
 use chrono::{DateTime, Duration, Utc};
@@ -27,11 +27,11 @@ impl Basic {
         match self.0.last.state {
             New => self.review_new(rating),
             Learning | Relearning => self.review_learning(rating),
-            Review => self.review_reviewing(rating),
+            Reviewing => self.review_reviewing(rating),
         }
     }
 
-    pub const fn current_review(&self, rating: Rating) -> crate::Review {
+    pub const fn current_review(&self, rating: Rating) -> Review {
         self.0.current_review(rating)
     }
 
@@ -48,7 +48,7 @@ impl Basic {
             Good => (0, Duration::minutes(10), Learning),
             Easy => {
                 let easy_interval = p.next_interval(card.stability, card.elapsed_days) as i64;
-                (easy_interval, Duration::days(easy_interval), Review)
+                (easy_interval, Duration::days(easy_interval), Reviewing)
             }
         };
 
@@ -71,7 +71,7 @@ impl Basic {
             Hard => (0, Duration::minutes(10), self.0.last.state),
             Good => {
                 let good_interval = p.next_interval(card.stability, interval) as i64;
-                (good_interval, Duration::days(good_interval), Review)
+                (good_interval, Duration::days(good_interval), Reviewing)
             }
             Easy => {
                 let good_stability = p.short_term_stability(self.0.last.stability, Good);
@@ -79,7 +79,7 @@ impl Basic {
                 let easy_interval = p
                     .next_interval(card.stability, interval)
                     .max(good_interval + 1.0) as i64;
-                (easy_interval, Duration::days(easy_interval), Review)
+                (easy_interval, Duration::days(easy_interval), Reviewing)
             }
         };
 
@@ -150,6 +150,6 @@ impl Basic {
 fn next_state(rating: Rating) -> State {
     match rating {
         Again => Relearning,
-        Hard | Good | Easy => Review,
+        Hard | Good | Easy => Reviewing,
     }
 }
