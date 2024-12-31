@@ -1,3 +1,4 @@
+mod cards;
 mod fuzz_range;
 mod prng;
 
