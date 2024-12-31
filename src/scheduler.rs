@@ -55,7 +55,7 @@ impl Scheduler {
 pub trait ImplScheduler {
     fn preview(&mut self) -> RecordLog {
         Rating::iter_variants()
-            .map(|&rating| (rating, self.review(rating)))
+            .map(|rating| (rating, self.review(rating)))
             .collect()
     }
     fn review(&mut self, rating: Rating) -> SchedulingInfo;
