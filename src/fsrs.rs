@@ -103,7 +103,7 @@ mod tests {
         for rating in TEST_RATINGS.into_iter() {
             let record = fsrs.next(card, now, rating);
             card = record.card;
-            let rev_log = record.review_log;
+            let rev_log = record.review;
             state_list.push(rev_log.state);
             now = card.due;
         }

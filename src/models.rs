@@ -64,7 +64,7 @@ pub struct Review {
 #[derive(Debug, Clone)]
 pub struct SchedulingInfo {
     pub card: Card,
-    pub review_log: Review,
+    pub review: Review,
 }
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]

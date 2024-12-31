@@ -48,7 +48,7 @@ impl Basic {
 
         SchedulingInfo {
             card: next,
-            review_log: self.0.build_log(rating),
+            review: self.0.current_review(rating),
         }
     }
 
@@ -100,7 +100,7 @@ impl Basic {
 
         SchedulingInfo {
             card: next,
-            review_log: self.0.build_log(rating),
+            review: self.0.current_review(rating),
         }
     }
 
@@ -174,19 +174,19 @@ impl Basic {
 
         let item_again = SchedulingInfo {
             card: next_again,
-            review_log: self.0.build_log(Again),
+            review: self.0.current_review(Again),
         };
         let item_hard = SchedulingInfo {
             card: next_hard,
-            review_log: self.0.build_log(Hard),
+            review: self.0.current_review(Hard),
         };
         let item_good = SchedulingInfo {
             card: next_good,
-            review_log: self.0.build_log(Good),
+            review: self.0.current_review(Good),
         };
         let item_easy = SchedulingInfo {
             card: next_easy,
-            review_log: self.0.build_log(Easy),
+            review: self.0.current_review(Easy),
         };
 
         match rating {

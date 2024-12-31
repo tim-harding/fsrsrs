@@ -3,10 +3,10 @@ use chrono::{DateTime, Utc};
 
 #[derive(Debug, Clone)]
 pub struct Base {
+    pub now: DateTime<Utc>,
     pub parameters: Parameters,
     pub last: Card,
     pub current: Card,
-    pub now: DateTime<Utc>,
 }
 
 impl Base {
@@ -28,7 +28,7 @@ impl Base {
         scheduler
     }
 
-    pub const fn build_log(&self, rating: Rating) -> Review {
+    pub const fn current_review(&self, rating: Rating) -> Review {
         Review {
             rating,
             state: self.current.state,
