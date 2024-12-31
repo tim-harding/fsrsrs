@@ -15,7 +15,7 @@ pub struct Base {
 
 impl Base {
     pub fn new(parameters: Parameters, card: Card, now: DateTime<Utc>) -> Self {
-        let mut current_card: Card = card.clone();
+        let mut current_card: Card = card;
         current_card.elapsed_days = match card.state {
             New => 0,
             _ => (now - card.last_review).num_days(),

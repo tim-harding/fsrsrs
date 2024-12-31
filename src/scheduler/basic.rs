@@ -11,9 +11,7 @@ pub struct Basic(Base);
 
 impl Basic {
     pub fn new(parameters: Parameters, card: Card, now: DateTime<Utc>) -> Self {
-        Self {
-            0: Base::new(parameters, card, now),
-        }
+        Self(Base::new(parameters, card, now))
     }
 
     fn new_state(&mut self, rating: Rating) -> SchedulingInfo {
@@ -21,7 +19,7 @@ impl Basic {
             return exist.clone();
         }
 
-        let mut next = self.0.current.clone();
+        let mut next = self.0.current;
         next.difficulty = self.0.parameters.init_difficulty(rating);
         next.stability = self.0.parameters.init_stability(rating);
 
@@ -65,7 +63,7 @@ impl Basic {
             return exist.clone();
         }
 
-        let mut next = self.0.current.clone();
+        let mut next = self.0.current;
         let interval = self.0.current.elapsed_days;
         next.difficulty = self
             .0
@@ -123,15 +121,15 @@ impl Basic {
             return exist.clone();
         }
 
-        let next = self.0.current.clone();
+        let next = self.0.current;
         let interval = self.0.current.elapsed_days;
         let stability = self.0.last.stability;
         let difficulty = self.0.last.difficulty;
-        let retrievability = self.0.last.retrievability(self.scheduler.now);
+        let retrievability = self.0.last.retrievability(self.0.now);
 
-        let mut next_again = next.clone();
-        let mut next_hard = next.clone();
-        let mut next_good = next.clone();
+        let mut next_again = next;
+        let mut next_hard = next;
+        let mut next_good = next;
         let mut next_easy = next;
 
         self.next_difficulty_stability(

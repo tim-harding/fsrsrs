@@ -11,9 +11,7 @@ pub struct Longterm(Base);
 
 impl Longterm {
     pub fn new(parameters: Parameters, card: Card, now: DateTime<Utc>) -> Self {
-        Self {
-            0: Base::new(parameters, card, now),
-        }
+        Self(Base::new(parameters, card, now))
     }
 
     fn new_state(&mut self, rating: Rating) -> SchedulingInfo {
@@ -21,13 +19,13 @@ impl Longterm {
             return exist.clone();
         }
 
-        let next = self.0.current.clone();
+        let next = self.0.current;
         self.0.current.scheduled_days = 0;
         self.0.current.elapsed_days = 0;
 
-        let mut next_again = next.clone();
-        let mut next_hard = next.clone();
-        let mut next_good = next.clone();
+        let mut next_again = next;
+        let mut next_hard = next;
+        let mut next_good = next;
         let mut next_easy = next;
 
         self.init_difficulty_stability(
@@ -63,15 +61,15 @@ impl Longterm {
             return exist.clone();
         }
 
-        let next = self.0.current.clone();
+        let next = self.0.current;
         let interval = self.0.current.elapsed_days;
         let stability = self.0.last.stability;
         let difficulty = self.0.last.difficulty;
         let retrievability = self.0.last.retrievability(self.0.now);
 
-        let mut next_again = next.clone();
-        let mut next_hard = next.clone();
-        let mut next_good = next.clone();
+        let mut next_again = next;
+        let mut next_hard = next;
+        let mut next_good = next;
         let mut next_easy = next;
 
         self.next_difficulty_stability(
@@ -222,19 +220,19 @@ impl Longterm {
         next_easy: &Card,
     ) {
         let item_again = SchedulingInfo {
-            card: next_again.clone(),
+            card: *next_again,
             review_log: self.0.build_log(Again),
         };
         let item_hard = SchedulingInfo {
-            card: next_hard.clone(),
+            card: *next_hard,
             review_log: self.0.build_log(Hard),
         };
         let item_good = SchedulingInfo {
-            card: next_good.clone(),
+            card: *next_good,
             review_log: self.0.build_log(Good),
         };
         let item_easy = SchedulingInfo {
-            card: next_easy.clone(),
+            card: *next_easy,
             review_log: self.0.build_log(Easy),
         };
 
