@@ -3,7 +3,7 @@ use crate::{
     Card, Parameters,
     Rating::{self, *},
     SchedulingInfo,
-    State::*,
+    State::{self, *},
 };
 use chrono::{DateTime, Duration, Utc};
 
@@ -148,12 +148,10 @@ impl Basic {
             &mut next_easy,
             interval,
         );
-        self.next_state(
-            &mut next_again,
-            &mut next_hard,
-            &mut next_good,
-            &mut next_easy,
-        );
+        next_again.state = Self::next_state(Again);
+        next_hard.state = Self::next_state(Hard);
+        next_good.state = Self::next_state(Good);
+        next_easy.state = Self::next_state(Easy);
         next_again.lapses += 1;
 
         let item_again = SchedulingInfo {
@@ -254,17 +252,11 @@ impl Basic {
         next_easy.due = self.0.now + Duration::days(easy_interval as i64);
     }
 
-    fn next_state(
-        &self,
-        next_again: &mut Card,
-        next_hard: &mut Card,
-        next_good: &mut Card,
-        next_easy: &mut Card,
-    ) {
-        next_again.state = Relearning;
-        next_hard.state = Review;
-        next_good.state = Review;
-        next_easy.state = Review;
+    fn next_state(rating: Rating) -> State {
+        match rating {
+            Again => Relearning,
+            Hard | Good | Easy => Review,
+        }
     }
 
     pub fn review(&mut self, rating: Rating) -> SchedulingInfo {
