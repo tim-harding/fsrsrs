@@ -16,15 +16,15 @@ impl Alea {
             s2: mash.mash(" "),
         };
 
-        alea.s0 -= mash.mash(&seed);
+        alea.s0 -= mash.mash(seed);
         if alea.s0 < 0.0 {
             alea.s0 += 1.0;
         }
-        alea.s1 -= mash.mash(&seed);
+        alea.s1 -= mash.mash(seed);
         if alea.s1 < 0.0 {
             alea.s1 += 1.0;
         }
-        alea.s2 -= mash.mash(&seed);
+        alea.s2 -= mash.mash(seed);
         if alea.s2 < 0.0 {
             alea.s2 += 1.0;
         }
