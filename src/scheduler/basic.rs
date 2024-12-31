@@ -15,14 +15,18 @@ impl Basic {
     }
 
     pub fn review(&mut self, rating: Rating) -> SchedulingInfo {
-        match self.0.last.state {
+        let card = match self.0.last.state {
             New => self.review_new(rating),
             Learning | Relearning => self.review_learning(rating),
             Review => self.review_reviewing(rating),
+        };
+        SchedulingInfo {
+            card,
+            review: self.0.current_review(rating),
         }
     }
 
-    fn review_new(&self, rating: Rating) -> SchedulingInfo {
+    fn review_new(&self, rating: Rating) -> Card {
         let mut next = self.0.current;
         next.difficulty = self.0.parameters.init_difficulty(rating);
         next.stability = self.0.parameters.init_stability(rating);
@@ -54,13 +58,10 @@ impl Basic {
             }
         };
 
-        SchedulingInfo {
-            card: next,
-            review: self.0.current_review(rating),
-        }
+        next
     }
 
-    fn review_learning(&mut self, rating: Rating) -> SchedulingInfo {
+    fn review_learning(&mut self, rating: Rating) -> Card {
         let mut next = self.0.current;
         let interval = self.0.current.elapsed_days;
         next.difficulty = self
@@ -106,13 +107,10 @@ impl Basic {
             }
         }
 
-        SchedulingInfo {
-            card: next,
-            review: self.0.current_review(rating),
-        }
+        next
     }
 
-    fn review_reviewing(&mut self, rating: Rating) -> SchedulingInfo {
+    fn review_reviewing(&mut self, rating: Rating) -> Card {
         let next = self.0.current;
         let interval = self.0.current.elapsed_days;
         let stability = self.0.last.stability;
@@ -180,28 +178,11 @@ impl Basic {
         next_easy.state = Self::next_state(Easy);
         next_again.lapses += 1;
 
-        let item_again = SchedulingInfo {
-            card: next_again,
-            review: self.0.current_review(Again),
-        };
-        let item_hard = SchedulingInfo {
-            card: next_hard,
-            review: self.0.current_review(Hard),
-        };
-        let item_good = SchedulingInfo {
-            card: next_good,
-            review: self.0.current_review(Good),
-        };
-        let item_easy = SchedulingInfo {
-            card: next_easy,
-            review: self.0.current_review(Easy),
-        };
-
         match rating {
-            Again => item_again,
-            Hard => item_hard,
-            Good => item_good,
-            Easy => item_easy,
+            Again => next_again,
+            Hard => next_hard,
+            Good => next_good,
+            Easy => next_easy,
         }
     }
 
