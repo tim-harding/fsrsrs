@@ -44,6 +44,7 @@ impl Base {
         }
     }
 
+    // TODO: Unconditionally clobbers user-provided seed
     fn init_seed(&mut self) {
         let time = self.now.timestamp_millis();
         let reps = self.current.reps;
