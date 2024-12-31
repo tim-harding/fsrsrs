@@ -7,25 +7,23 @@ use crate::{
 };
 use chrono::{DateTime, Duration, Utc};
 
-pub struct Longterm {
-    scheduler: Base,
-}
+pub struct Longterm(Base);
 
 impl Longterm {
     pub fn new(parameters: Parameters, card: Card, now: DateTime<Utc>) -> Self {
         Self {
-            scheduler: Base::new(parameters, card, now),
+            0: Base::new(parameters, card, now),
         }
     }
 
     fn new_state(&mut self, rating: Rating) -> SchedulingInfo {
-        if let Some(exist) = self.scheduler.next.get(&rating) {
+        if let Some(exist) = self.0.next.get(&rating) {
             return exist.clone();
         }
 
-        let next = self.scheduler.current.clone();
-        self.scheduler.current.scheduled_days = 0;
-        self.scheduler.current.elapsed_days = 0;
+        let next = self.0.current.clone();
+        self.0.current.scheduled_days = 0;
+        self.0.current.elapsed_days = 0;
 
         let mut next_again = next.clone();
         let mut next_hard = next.clone();
@@ -53,7 +51,7 @@ impl Longterm {
         );
         self.update_next(&next_again, &next_hard, &next_good, &next_easy);
 
-        self.scheduler.next.get(&rating).unwrap().to_owned()
+        self.0.next.get(&rating).unwrap().to_owned()
     }
 
     fn learning_state(&mut self, rating: Rating) -> SchedulingInfo {
@@ -61,15 +59,15 @@ impl Longterm {
     }
 
     fn review_state(&mut self, rating: Rating) -> SchedulingInfo {
-        if let Some(exist) = self.scheduler.next.get(&rating) {
+        if let Some(exist) = self.0.next.get(&rating) {
             return exist.clone();
         }
 
-        let next = self.scheduler.current.clone();
-        let interval = self.scheduler.current.elapsed_days;
-        let stability = self.scheduler.last.stability;
-        let difficulty = self.scheduler.last.difficulty;
-        let retrievability = self.scheduler.last.retrievability(self.scheduler.now);
+        let next = self.0.current.clone();
+        let interval = self.0.current.elapsed_days;
+        let stability = self.0.last.stability;
+        let difficulty = self.0.last.difficulty;
+        let retrievability = self.0.last.retrievability(self.0.now);
 
         let mut next_again = next.clone();
         let mut next_hard = next.clone();
@@ -101,7 +99,7 @@ impl Longterm {
         next_again.lapses += 1;
 
         self.update_next(&next_again, &next_hard, &next_good, &next_easy);
-        self.scheduler.next.get(&rating).unwrap().to_owned()
+        self.0.next.get(&rating).unwrap().to_owned()
     }
 
     fn init_difficulty_stability(
@@ -111,17 +109,17 @@ impl Longterm {
         next_good: &mut Card,
         next_easy: &mut Card,
     ) {
-        next_again.difficulty = self.scheduler.parameters.init_difficulty(Again);
-        next_again.stability = self.scheduler.parameters.init_stability(Again);
+        next_again.difficulty = self.0.parameters.init_difficulty(Again);
+        next_again.stability = self.0.parameters.init_stability(Again);
 
-        next_hard.difficulty = self.scheduler.parameters.init_difficulty(Hard);
-        next_hard.stability = self.scheduler.parameters.init_stability(Hard);
+        next_hard.difficulty = self.0.parameters.init_difficulty(Hard);
+        next_hard.stability = self.0.parameters.init_stability(Hard);
 
-        next_good.difficulty = self.scheduler.parameters.init_difficulty(Good);
-        next_good.stability = self.scheduler.parameters.init_stability(Good);
+        next_good.difficulty = self.0.parameters.init_difficulty(Good);
+        next_good.stability = self.0.parameters.init_stability(Good);
 
-        next_easy.difficulty = self.scheduler.parameters.init_difficulty(Easy);
-        next_easy.stability = self.scheduler.parameters.init_stability(Easy);
+        next_easy.difficulty = self.0.parameters.init_difficulty(Easy);
+        next_easy.stability = self.0.parameters.init_stability(Easy);
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -135,35 +133,29 @@ impl Longterm {
         stability: f64,
         retrievability: f64,
     ) {
-        next_again.difficulty = self.scheduler.parameters.next_difficulty(difficulty, Again);
+        next_again.difficulty = self.0.parameters.next_difficulty(difficulty, Again);
         next_again.stability =
-            self.scheduler
+            self.0
                 .parameters
                 .next_forget_stability(difficulty, stability, retrievability);
 
-        next_hard.difficulty = self.scheduler.parameters.next_difficulty(difficulty, Hard);
-        next_hard.stability = self.scheduler.parameters.next_recall_stability(
-            difficulty,
-            stability,
-            retrievability,
-            Hard,
-        );
+        next_hard.difficulty = self.0.parameters.next_difficulty(difficulty, Hard);
+        next_hard.stability =
+            self.0
+                .parameters
+                .next_recall_stability(difficulty, stability, retrievability, Hard);
 
-        next_good.difficulty = self.scheduler.parameters.next_difficulty(difficulty, Good);
-        next_good.stability = self.scheduler.parameters.next_recall_stability(
-            difficulty,
-            stability,
-            retrievability,
-            Good,
-        );
+        next_good.difficulty = self.0.parameters.next_difficulty(difficulty, Good);
+        next_good.stability =
+            self.0
+                .parameters
+                .next_recall_stability(difficulty, stability, retrievability, Good);
 
-        next_easy.difficulty = self.scheduler.parameters.next_difficulty(difficulty, Easy);
-        next_easy.stability = self.scheduler.parameters.next_recall_stability(
-            difficulty,
-            stability,
-            retrievability,
-            Easy,
-        );
+        next_easy.difficulty = self.0.parameters.next_difficulty(difficulty, Easy);
+        next_easy.stability =
+            self.0
+                .parameters
+                .next_recall_stability(difficulty, stability, retrievability, Easy);
     }
 
     fn next_interval(
@@ -175,19 +167,19 @@ impl Longterm {
         elapsed_days: i64,
     ) {
         let mut again_interval = self
-            .scheduler
+            .0
             .parameters
             .next_interval(next_again.stability, elapsed_days);
         let mut hard_interval = self
-            .scheduler
+            .0
             .parameters
             .next_interval(next_hard.stability, elapsed_days);
         let mut good_interval = self
-            .scheduler
+            .0
             .parameters
             .next_interval(next_good.stability, elapsed_days);
         let mut easy_interval = self
-            .scheduler
+            .0
             .parameters
             .next_interval(next_easy.stability, elapsed_days);
 
@@ -197,16 +189,16 @@ impl Longterm {
         easy_interval = easy_interval.max(good_interval + 1.0);
 
         next_again.scheduled_days = again_interval as i64;
-        next_again.due = self.scheduler.now + Duration::days(again_interval as i64);
+        next_again.due = self.0.now + Duration::days(again_interval as i64);
 
         next_hard.scheduled_days = hard_interval as i64;
-        next_hard.due = self.scheduler.now + Duration::days(hard_interval as i64);
+        next_hard.due = self.0.now + Duration::days(hard_interval as i64);
 
         next_good.scheduled_days = good_interval as i64;
-        next_good.due = self.scheduler.now + Duration::days(good_interval as i64);
+        next_good.due = self.0.now + Duration::days(good_interval as i64);
 
         next_easy.scheduled_days = easy_interval as i64;
-        next_easy.due = self.scheduler.now + Duration::days(easy_interval as i64);
+        next_easy.due = self.0.now + Duration::days(easy_interval as i64);
     }
 
     fn next_state(
@@ -231,29 +223,29 @@ impl Longterm {
     ) {
         let item_again = SchedulingInfo {
             card: next_again.clone(),
-            review_log: self.scheduler.build_log(Again),
+            review_log: self.0.build_log(Again),
         };
         let item_hard = SchedulingInfo {
             card: next_hard.clone(),
-            review_log: self.scheduler.build_log(Hard),
+            review_log: self.0.build_log(Hard),
         };
         let item_good = SchedulingInfo {
             card: next_good.clone(),
-            review_log: self.scheduler.build_log(Good),
+            review_log: self.0.build_log(Good),
         };
         let item_easy = SchedulingInfo {
             card: next_easy.clone(),
-            review_log: self.scheduler.build_log(Easy),
+            review_log: self.0.build_log(Easy),
         };
 
-        self.scheduler.next.insert(Again, item_again);
-        self.scheduler.next.insert(Hard, item_hard);
-        self.scheduler.next.insert(Good, item_good);
-        self.scheduler.next.insert(Easy, item_easy);
+        self.0.next.insert(Again, item_again);
+        self.0.next.insert(Hard, item_hard);
+        self.0.next.insert(Good, item_good);
+        self.0.next.insert(Easy, item_easy);
     }
 
     pub fn review(&mut self, rating: Rating) -> SchedulingInfo {
-        match self.scheduler.last.state {
+        match self.0.last.state {
             New => self.new_state(rating),
             Learning | Relearning => self.learning_state(rating),
             Review => self.review_state(rating),
