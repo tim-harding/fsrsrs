@@ -41,7 +41,6 @@ impl Parameters {
         self.w[(rating_int - 1) as usize].max(0.1)
     }
 
-    #[allow(clippy::suboptimal_flops)]
     pub fn next_interval(&self, stability: f64, elapsed_days: i64) -> f64 {
         let new_interval = (stability / Self::FACTOR
             * (self.request_retention.powf(1.0 / Self::DECAY) - 1.0))
