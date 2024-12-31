@@ -2,7 +2,7 @@ mod base;
 mod basic;
 mod longterm;
 
-use crate::{Card, Parameters, Rating, Review, SchedulingInfo};
+use crate::{Card, Parameters, Rating, Review, Schedule};
 use basic::Basic;
 use chrono::{DateTime, Utc};
 use longterm::Longterm;
@@ -33,9 +33,9 @@ impl Scheduler {
     }
 
     // TODO: Take &self
-    pub fn review(&mut self, rating: Rating) -> SchedulingInfo {
+    pub fn schedule(&mut self, rating: Rating) -> Schedule {
         match &mut self.0 {
-            Inner::Basic(basic) => basic.review(rating),
+            Inner::Basic(basic) => basic.schedule(rating),
             Inner::Longterm(longterm) => longterm.review(rating),
         }
     }

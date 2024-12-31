@@ -3,7 +3,7 @@ use crate::{
     cards::Cards,
     Card, Parameters,
     Rating::{self, *},
-    SchedulingInfo,
+    Schedule,
     State::{self, *},
 };
 use chrono::{DateTime, Duration, Utc};
@@ -16,8 +16,8 @@ impl Basic {
     }
 
     // TODO: Move this into Scheduler only
-    pub fn review(&self, rating: Rating) -> SchedulingInfo {
-        SchedulingInfo {
+    pub fn schedule(&self, rating: Rating) -> Schedule {
+        Schedule {
             card: self.next_card(rating),
             review: self.current_review(rating),
         }

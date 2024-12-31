@@ -62,7 +62,7 @@ pub struct Review {
 }
 
 #[derive(Debug, Clone)]
-pub struct SchedulingInfo {
+pub struct Schedule {
     pub card: Card,
     pub review: Review,
 }

@@ -2,7 +2,7 @@ use super::base::Base;
 use crate::{
     Card, Parameters,
     Rating::{self, *},
-    SchedulingInfo,
+    Schedule,
     State::*,
 };
 use chrono::{DateTime, Duration, Utc};
@@ -14,7 +14,7 @@ impl Longterm {
         Self(Base::new(parameters, card, now))
     }
 
-    fn new_state(&mut self, rating: Rating) -> SchedulingInfo {
+    fn new_state(&mut self, rating: Rating) -> Schedule {
         let next = self.0.current;
         self.0.current.scheduled_days = 0;
         self.0.current.elapsed_days = 0;
@@ -44,19 +44,19 @@ impl Longterm {
             &mut next_easy,
         );
 
-        let item_again = SchedulingInfo {
+        let item_again = Schedule {
             card: next_again,
             review: self.0.current_review(Again),
         };
-        let item_hard = SchedulingInfo {
+        let item_hard = Schedule {
             card: next_hard,
             review: self.0.current_review(Hard),
         };
-        let item_good = SchedulingInfo {
+        let item_good = Schedule {
             card: next_good,
             review: self.0.current_review(Good),
         };
-        let item_easy = SchedulingInfo {
+        let item_easy = Schedule {
             card: next_easy,
             review: self.0.current_review(Easy),
         };
@@ -69,11 +69,11 @@ impl Longterm {
         }
     }
 
-    fn learning_state(&mut self, rating: Rating) -> SchedulingInfo {
+    fn learning_state(&mut self, rating: Rating) -> Schedule {
         self.review_state(rating)
     }
 
-    fn review_state(&mut self, rating: Rating) -> SchedulingInfo {
+    fn review_state(&mut self, rating: Rating) -> Schedule {
         let next = self.0.current;
         let interval = self.0.current.elapsed_days;
         let stability = self.0.last.stability;
@@ -109,19 +109,19 @@ impl Longterm {
         );
         next_again.lapses += 1;
 
-        let item_again = SchedulingInfo {
+        let item_again = Schedule {
             card: next_again,
             review: self.0.current_review(Again),
         };
-        let item_hard = SchedulingInfo {
+        let item_hard = Schedule {
             card: next_hard,
             review: self.0.current_review(Hard),
         };
-        let item_good = SchedulingInfo {
+        let item_good = Schedule {
             card: next_good,
             review: self.0.current_review(Good),
         };
-        let item_easy = SchedulingInfo {
+        let item_easy = Schedule {
             card: next_easy,
             review: self.0.current_review(Easy),
         };
@@ -246,7 +246,7 @@ impl Longterm {
         next_easy.state = Review;
     }
 
-    pub fn review(&mut self, rating: Rating) -> SchedulingInfo {
+    pub fn review(&mut self, rating: Rating) -> Schedule {
         match self.0.last.state {
             New => self.new_state(rating),
             Learning | Relearning => self.learning_state(rating),

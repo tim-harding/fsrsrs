@@ -9,7 +9,7 @@ mod scheduler;
 pub use scheduler::Scheduler;
 
 mod models;
-pub use models::{Card, Rating, Review, SchedulingInfo, State};
+pub use models::{Card, Rating, Review, Schedule, State};
 
 mod parameters;
 pub use parameters::Parameters;

@@ -93,7 +93,7 @@ mod tests {
         let mut state_list = vec![];
 
         for rating in TEST_RATINGS.into_iter() {
-            let record = fsrs.scheduler(card, now).review(rating);
+            let record = fsrs.scheduler(card, now).schedule(rating);
             card = record.card;
             let rev_log = record.review;
             state_list.push(rev_log.state);
