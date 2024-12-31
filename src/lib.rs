@@ -1,4 +1,4 @@
-mod alea;
+mod prng;
 
 mod scheduler;
 pub use scheduler::Scheduler;

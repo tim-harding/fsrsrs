@@ -1,4 +1,4 @@
-use crate::{alea::Prng, Rating};
+use crate::{prng::Prng, Rating};
 use std::time::Instant;
 
 type Weights = [f64; 19];
