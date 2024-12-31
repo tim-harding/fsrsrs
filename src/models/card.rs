@@ -3,18 +3,18 @@ use crate::Parameters;
 use super::State;
 use chrono::{DateTime, Utc};
 
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Default)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Card {
+    pub last_review: DateTime<Utc>,
     pub due: DateTime<Utc>,
+    pub state: State,
     pub stability: f64,
     pub difficulty: f64,
     pub elapsed_days: i64,
     pub scheduled_days: i64,
     pub reps: i32,
     pub lapses: i32,
-    pub state: State,
-    pub last_review: DateTime<Utc>,
 }
 
 impl Card {
@@ -26,13 +26,14 @@ impl Card {
         }
     }
 
-    pub fn retrievability(&self, now: DateTime<Utc>) -> f64 {
+    pub fn elapsed_days(&self, now: DateTime<Utc>) -> i64 {
         match self.state {
-            State::New => 0.0,
-            _ => {
-                let elapsed_days = now.signed_duration_since(self.last_review).num_days();
-                Parameters::forgetting_curve(elapsed_days as f64, self.stability)
-            }
+            State::New => 0,
+            _ => now.signed_duration_since(self.last_review).num_days(),
         }
+    }
+
+    pub fn retrievability(&self, now: DateTime<Utc>) -> f64 {
+        Parameters::forgetting_curve(self.elapsed_days(now) as f64, self.stability)
     }
 }
