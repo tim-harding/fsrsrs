@@ -1,17 +1,18 @@
-use crate::models::{Card, Rating, RecordLog, SchedulingInfo};
-use crate::parameters::Parameters;
-use crate::scheduler_basic::BasicScheduler;
-use crate::scheduler_longterm::LongtermScheduler;
-use crate::ImplScheduler;
-
+use crate::{
+    models::{Card, Rating, RecordLog, SchedulingInfo},
+    parameters::Parameters,
+    scheduler_basic::BasicScheduler,
+    scheduler_longterm::LongtermScheduler,
+    ImplScheduler,
+};
 use chrono::{DateTime, Utc};
 
 #[derive(Debug, Default, Clone)]
-pub struct FSRS {
+pub struct Fsrs {
     parameters: Parameters,
 }
 
-impl FSRS {
+impl Fsrs {
     pub const fn new(parameters: Parameters) -> Self {
         Self { parameters }
     }

@@ -2,7 +2,7 @@
 use {
     crate::{
         alea::{alea, AleaState},
-        algo::FSRS,
+        algo::Fsrs,
         models::{Card, Rating, State},
         parameters::{Parameters, Seed},
     },
@@ -52,7 +52,7 @@ impl RoundFloat for f64 {
 
 #[test]
 fn test_basic_scheduler_interval() {
-    let fsrs = FSRS::default();
+    let fsrs = Fsrs::default();
     let mut card = Card::new();
     let mut now = string_to_utc("2022-11-29 12:30:00 +0000 UTC");
     let mut interval_history = vec![];
@@ -74,7 +74,7 @@ fn test_basic_scheduler_state() {
         ..Default::default()
     };
 
-    let fsrs = FSRS::new(params);
+    let fsrs = Fsrs::new(params);
     let mut card = Card::new();
     let mut now = string_to_utc("2022-11-29 12:30:00 +0000 UTC");
     let mut state_list = vec![];
@@ -102,7 +102,7 @@ fn test_basic_scheduler_memo_state() {
         ..Default::default()
     };
 
-    let fsrs = FSRS::new(params);
+    let fsrs = Fsrs::new(params);
     let mut card = Card::new();
     let mut now = string_to_utc("2022-11-29 12:30:00 +0000 UTC");
     let mut record_log = fsrs.repeat(card.clone(), now);
@@ -134,7 +134,7 @@ fn test_long_term_scheduler() {
         ..Default::default()
     };
 
-    let fsrs = FSRS::new(params);
+    let fsrs = Fsrs::new(params);
     let mut card = Card::new();
     let mut now = string_to_utc("2022-11-29 12:30:00 +0000 UTC");
     let mut interval_history = vec![];
@@ -276,7 +276,7 @@ fn test_seed_example_3() {
 
 #[test]
 fn test_get_retrievability() {
-    let fsrs = FSRS::default();
+    let fsrs = Fsrs::default();
     let card = Card::new();
     let now = string_to_utc("2022-11-29 12:30:00 +0000 UTC");
     let expect_retrievability = [1.0, 1.0, 1.0, 0.9026208];
