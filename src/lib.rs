@@ -1,4 +1,5 @@
 mod prng;
+mod tests;
 
 mod scheduler;
 pub use scheduler::Scheduler;
@@ -11,4 +12,3 @@ pub use models::{Card, Rating, RecordLog, ReviewLog, SchedulingInfo, State};
 
 mod parameters;
 pub use parameters::Parameters;
-mod tests;
