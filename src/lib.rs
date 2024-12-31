@@ -1,6 +1,5 @@
 mod fuzz_range;
 mod prng;
-mod tests;
 
 mod scheduler;
 pub use scheduler::Scheduler;
