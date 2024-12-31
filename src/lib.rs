@@ -1,3 +1,4 @@
+mod fuzz_range;
 mod prng;
 mod tests;
 
