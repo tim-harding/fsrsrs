@@ -1,10 +1,12 @@
 mod cards;
 mod fuzz_range;
 mod prng;
-mod scheduler;
 
 mod fsrs;
 pub use fsrs::Fsrs;
+
+mod scheduler;
+pub use scheduler::Scheduler;
 
 mod models;
 pub use models::{Card, Rating, Review, SchedulingInfo, State};

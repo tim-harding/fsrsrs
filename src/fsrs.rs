@@ -1,8 +1,4 @@
-use crate::{
-    models::{Card, Rating, SchedulingInfo},
-    parameters::Parameters,
-    scheduler::Scheduler,
-};
+use crate::{models::Card, parameters::Parameters, scheduler::Scheduler};
 use chrono::{DateTime, Utc};
 
 #[derive(Debug, Default, Clone)]
@@ -15,11 +11,7 @@ impl Fsrs {
         Self { parameters }
     }
 
-    pub fn next(&self, card: Card, now: DateTime<Utc>, rating: Rating) -> SchedulingInfo {
-        self.scheduler(card, now).review(rating)
-    }
-
-    fn scheduler(&self, card: Card, now: DateTime<Utc>) -> Scheduler {
+    pub fn scheduler(&self, card: Card, now: DateTime<Utc>) -> Scheduler {
         // TODO: Avoid cloning this each time
         Scheduler::new(self.parameters.clone(), card, now)
     }
@@ -79,9 +71,8 @@ mod tests {
         let mut now = string_to_utc("2022-11-29 12:30:00 +0000 UTC");
         let mut interval_history = vec![];
 
-        for rating in TEST_RATINGS.iter() {
-            let next = fsrs.next(card, now, *rating);
-            card = next.card;
+        for rating in TEST_RATINGS.into_iter() {
+            card = fsrs.scheduler(card, now).next_card(rating);
             interval_history.push(card.scheduled_days);
             now = card.due;
         }
@@ -102,7 +93,7 @@ mod tests {
         let mut state_list = vec![];
 
         for rating in TEST_RATINGS.into_iter() {
-            let record = fsrs.next(card, now, rating);
+            let record = fsrs.scheduler(card, now).review(rating);
             card = record.card;
             let rev_log = record.review;
             state_list.push(rev_log.state);
@@ -136,13 +127,11 @@ mod tests {
         ];
         let intervals = [0, 0, 1, 3, 8, 21];
         for (index, rating) in ratings.into_iter().enumerate() {
-            let record = fsrs.next(card, now, rating);
-            card = record.card;
+            card = fsrs.scheduler(card, now).next_card(rating);
             now += Duration::days(intervals[index] as i64);
         }
 
-        let record = fsrs.next(card, now, Rating::Good);
-        card = record.card;
+        card = fsrs.scheduler(card, now).next_card(Rating::Good);
         assert_eq!(card.stability.round_float(4), 71.4554);
         assert_eq!(card.difficulty.round_float(4), 5.0976);
     }
@@ -163,12 +152,12 @@ mod tests {
         let mut difficulty_history = vec![];
 
         for rating in TEST_RATINGS.into_iter() {
-            let record = fsrs.next(card, now, rating);
-            let next = fsrs.next(card, now, rating);
+            let mut scheduler = fsrs.scheduler(card, now);
+            card = scheduler.next_card(rating);
+            let next = scheduler.next_card(rating);
 
-            assert_eq!(record.card, next.card);
+            assert_eq!(card, next);
 
-            card = record.card;
             interval_history.push(card.scheduled_days);
             stability_history.push(card.stability.round_float(4));
             difficulty_history.push(card.difficulty.round_float(4));
@@ -201,7 +190,7 @@ mod tests {
             .into_iter()
             .enumerate()
         {
-            let card = fsrs.next(card, now, rating).card;
+            let card = fsrs.scheduler(card, now).next_card(rating);
             let retrievability = card.retrievability(&Parameters::new(), card.due);
 
             assert_eq!(retrievability.round_float(7), expect_retrievability[i]);

@@ -15,16 +15,24 @@ impl Basic {
         Self(Base::new(parameters, card, now))
     }
 
+    // TODO: Move this into Scheduler only
     pub fn review(&self, rating: Rating) -> SchedulingInfo {
-        let card = match self.0.last.state {
+        SchedulingInfo {
+            card: self.next_card(rating),
+            review: self.current_review(rating),
+        }
+    }
+
+    pub fn next_card(&self, rating: Rating) -> Card {
+        match self.0.last.state {
             New => self.review_new(rating),
             Learning | Relearning => self.review_learning(rating),
             Review => self.review_reviewing(rating),
-        };
-        SchedulingInfo {
-            card,
-            review: self.0.current_review(rating),
         }
+    }
+
+    pub const fn current_review(&self, rating: Rating) -> crate::Review {
+        self.0.current_review(rating)
     }
 
     fn review_new(&self, rating: Rating) -> Card {
