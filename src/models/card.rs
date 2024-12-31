@@ -33,7 +33,7 @@ impl Card {
         }
     }
 
-    pub fn retrievability(&self, now: DateTime<Utc>) -> f64 {
-        Parameters::forgetting_curve(self.elapsed_days(now) as f64, self.stability)
+    pub fn retrievability(&self, parameters: &Parameters, now: DateTime<Utc>) -> f64 {
+        parameters.forgetting_curve(self.elapsed_days(now) as f64, self.stability)
     }
 }

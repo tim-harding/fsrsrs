@@ -1,6 +1,5 @@
-use std::time::Instant;
-
 use crate::{parameters::Weights, Parameters};
+use std::time::Instant;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Default)]
 pub struct ParametersBuilder {

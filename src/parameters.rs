@@ -22,8 +22,12 @@ impl Parameters {
         1.9813, 0.0953, 0.2975, 2.2042, 0.2407, 2.9466, 0.5034, 0.6567,
     ];
 
-    pub fn forgetting_curve(elapsed_days: f64, stability: f64) -> f64 {
-        (1.0 + Self::FACTOR * elapsed_days / stability).powf(Self::DECAY)
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn forgetting_curve(&self, elapsed_days: f64, stability: f64) -> f64 {
+        (1.0 + self.factor * elapsed_days / stability).powf(self.decay)
     }
 
     pub fn init_difficulty(&self, rating: Rating) -> f64 {

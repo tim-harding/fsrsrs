@@ -125,7 +125,7 @@ impl Basic {
         let interval = self.0.current.elapsed_days;
         let stability = self.0.last.stability;
         let difficulty = self.0.last.difficulty;
-        let retrievability = self.0.last.retrievability(self.0.now);
+        let retrievability = self.0.last.retrievability(&self.0.parameters, self.0.now);
 
         let mut next_again = next;
         let mut next_hard = next;
