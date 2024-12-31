@@ -15,7 +15,7 @@ impl Basic {
         Self(Base::new(parameters, card, now))
     }
 
-    pub fn review(&mut self, rating: Rating) -> SchedulingInfo {
+    pub fn review(&self, rating: Rating) -> SchedulingInfo {
         let card = match self.0.last.state {
             New => self.review_new(rating),
             Learning | Relearning => self.review_learning(rating),
@@ -50,7 +50,7 @@ impl Basic {
         card
     }
 
-    fn review_learning(&mut self, rating: Rating) -> Card {
+    fn review_learning(&self, rating: Rating) -> Card {
         let p = &self.0.parameters;
         let interval = self.0.current.elapsed_days;
 
@@ -81,7 +81,7 @@ impl Basic {
         card
     }
 
-    fn review_reviewing(&mut self, rating: Rating) -> Card {
+    fn review_reviewing(&self, rating: Rating) -> Card {
         let p = &self.0.parameters;
         let interval = self.0.current.elapsed_days;
         let stability = self.0.last.stability;
@@ -112,7 +112,7 @@ impl Basic {
         card.scheduled_days = days;
         card.due = self.0.now + due;
         card.lapses += lapses;
-        card.state = Self::next_state(rating);
+        card.state = next_state(rating);
         card
     }
 
@@ -137,11 +137,11 @@ impl Basic {
             easy_interval as i64,
         ]
     }
+}
 
-    fn next_state(rating: Rating) -> State {
-        match rating {
-            Again => Relearning,
-            Hard | Good | Easy => Review,
-        }
+fn next_state(rating: Rating) -> State {
+    match rating {
+        Again => Relearning,
+        Hard | Good | Easy => Review,
     }
 }

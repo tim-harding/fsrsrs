@@ -18,6 +18,7 @@ impl Scheduler {
         })
     }
 
+    // TODO: Take &self
     pub fn review(&mut self, rating: Rating) -> SchedulingInfo {
         match &mut self.0 {
             Inner::Basic(basic) => basic.review(rating),
