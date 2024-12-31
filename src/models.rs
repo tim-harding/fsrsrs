@@ -2,11 +2,8 @@ use crate::Parameters;
 use chrono::{DateTime, Utc};
 use std::collections::HashMap;
 
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
-
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum State {
     #[default]
     New = 0,
@@ -16,7 +13,7 @@ pub enum State {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Rating {
     Again = 1,
     Hard = 2,
@@ -39,7 +36,7 @@ pub struct SchedulingInfo {
 pub type RecordLog = HashMap<Rating, SchedulingInfo>;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ReviewLog {
     pub rating: Rating,
     pub elapsed_days: i64,
@@ -49,7 +46,7 @@ pub struct ReviewLog {
 }
 
 #[derive(Clone, Debug, Default, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Card {
     pub due: DateTime<Utc>,
     pub stability: f64,
