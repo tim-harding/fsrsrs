@@ -278,7 +278,7 @@ fn test_get_retrievability() {
     let expect_retrievability = [1.0, 1.0, 1.0, 0.9026208];
     let scheduler = fsrs.repeat(card, now);
 
-    for (i, rating) in Rating::iter().enumerate() {
+    for (i, rating) in Rating::iter_variants().enumerate() {
         let card = scheduler.get(rating).unwrap().card.clone();
         let retrievability = card.get_retrievability(card.due);
 

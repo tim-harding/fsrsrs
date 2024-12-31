@@ -25,9 +25,8 @@ pub enum Rating {
 }
 
 impl Rating {
-    pub fn iter() -> std::slice::Iter<'static, Self> {
-        static VARIANTS: [Rating; 4] = [Rating::Again, Rating::Hard, Rating::Good, Rating::Easy];
-        VARIANTS.iter()
+    pub fn iter_variants() -> impl Iterator<Item = Self> {
+        [Rating::Again, Rating::Hard, Rating::Good, Rating::Easy].into_iter()
     }
 }
 
