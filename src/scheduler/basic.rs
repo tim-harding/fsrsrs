@@ -29,6 +29,7 @@ impl Basic {
 
     fn review_new(&self, rating: Rating) -> Card {
         let p = &self.0.parameters;
+
         let mut card = self.0.current;
         card.difficulty = p.init_difficulty(rating);
         card.stability = p.init_stability(rating);
@@ -51,8 +52,9 @@ impl Basic {
 
     fn review_learning(&mut self, rating: Rating) -> Card {
         let p = &self.0.parameters;
-        let mut card = self.0.current;
         let interval = self.0.current.elapsed_days;
+
+        let mut card = self.0.current;
         card.difficulty = p.next_difficulty(self.0.last.difficulty, rating);
         card.stability = p.short_term_stability(self.0.last.stability, rating);
 
@@ -99,8 +101,6 @@ impl Basic {
             interval,
         );
 
-        let mut card = cards.get(rating);
-
         let (days, due, lapses) = match rating {
             Again => (0, Duration::minutes(5), 1),
             Hard => (hard_interval, Duration::days(hard_interval), 0),
@@ -108,6 +108,7 @@ impl Basic {
             Easy => (easy_interval, Duration::days(easy_interval), 0),
         };
 
+        let mut card = cards.get(rating);
         card.scheduled_days = days;
         card.due = self.0.now + due;
         card.lapses += lapses;
