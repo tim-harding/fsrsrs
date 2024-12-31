@@ -1,11 +1,11 @@
 use crate::{
-    models::{RecordLog, SchedulingInfo, State::*},
+    models::{RecordLog, State::*},
     Card, Parameters, Rating, ReviewLog,
 };
 use chrono::{DateTime, Utc};
 
 #[derive(Debug, Clone)]
-pub struct Scheduler {
+pub struct Base {
     pub parameters: Parameters,
     pub last: Card,
     pub current: Card,
@@ -13,7 +13,7 @@ pub struct Scheduler {
     pub next: RecordLog,
 }
 
-impl Scheduler {
+impl Base {
     pub fn new(parameters: Parameters, card: Card, now: DateTime<Utc>) -> Self {
         let mut current_card: Card = card.clone();
         current_card.elapsed_days = match card.state {
@@ -50,13 +50,4 @@ impl Scheduler {
         let mul = self.current.difficulty * self.current.stability;
         self.parameters.seed = format!("{}_{}_{}", time, reps, mul);
     }
-}
-
-pub trait ImplScheduler {
-    fn preview(&mut self) -> RecordLog {
-        Rating::iter_variants()
-            .map(|rating| (rating, self.review(rating)))
-            .collect()
-    }
-    fn review(&mut self, rating: Rating) -> SchedulingInfo;
 }

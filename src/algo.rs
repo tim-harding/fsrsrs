@@ -1,9 +1,7 @@
 use crate::{
     models::{Card, Rating, RecordLog, SchedulingInfo},
     parameters::Parameters,
-    scheduler_basic::BasicScheduler,
-    scheduler_longterm::LongtermScheduler,
-    ImplScheduler,
+    Scheduler,
 };
 use chrono::{DateTime, Utc};
 
@@ -17,12 +15,8 @@ impl Fsrs {
         Self { parameters }
     }
 
-    pub fn scheduler(&self, card: Card, now: DateTime<Utc>) -> Box<dyn ImplScheduler> {
-        if self.parameters.enable_short_term {
-            Box::new(BasicScheduler::new(self.parameters.clone(), card, now))
-        } else {
-            Box::new(LongtermScheduler::new(self.parameters.clone(), card, now))
-        }
+    pub fn scheduler(&self, card: Card, now: DateTime<Utc>) -> Scheduler {
+        Scheduler::new(self.parameters.clone(), card, now)
     }
 
     pub fn repeat(&self, card: Card, now: DateTime<Utc>) -> RecordLog {

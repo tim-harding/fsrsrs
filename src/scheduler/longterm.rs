@@ -1,19 +1,20 @@
+use super::base::Base;
 use crate::{
-    Card, ImplScheduler, Parameters,
+    Card, Parameters,
     Rating::{self, *},
-    Scheduler, SchedulingInfo,
+    SchedulingInfo,
     State::*,
 };
 use chrono::{DateTime, Duration, Utc};
 
-pub struct LongtermScheduler {
-    scheduler: Scheduler,
+pub struct Longterm {
+    scheduler: Base,
 }
 
-impl LongtermScheduler {
+impl Longterm {
     pub fn new(parameters: Parameters, card: Card, now: DateTime<Utc>) -> Self {
         Self {
-            scheduler: Scheduler::new(parameters, card, now),
+            scheduler: Base::new(parameters, card, now),
         }
     }
 
@@ -250,10 +251,8 @@ impl LongtermScheduler {
         self.scheduler.next.insert(Good, item_good);
         self.scheduler.next.insert(Easy, item_easy);
     }
-}
 
-impl ImplScheduler for LongtermScheduler {
-    fn review(&mut self, rating: Rating) -> SchedulingInfo {
+    pub fn review(&mut self, rating: Rating) -> SchedulingInfo {
         match self.scheduler.last.state {
             New => self.new_state(rating),
             Learning | Relearning => self.learning_state(rating),

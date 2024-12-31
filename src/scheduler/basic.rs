@@ -1,20 +1,20 @@
+use super::base::Base;
 use crate::{
-    scheduler::Scheduler,
-    Card, ImplScheduler, Parameters,
+    Card, Parameters,
     Rating::{self, *},
     SchedulingInfo,
     State::*,
 };
 use chrono::{DateTime, Duration, Utc};
 
-pub struct BasicScheduler {
-    pub scheduler: Scheduler,
+pub struct Basic {
+    pub scheduler: Base,
 }
 
-impl BasicScheduler {
+impl Basic {
     pub fn new(parameters: Parameters, card: Card, now: DateTime<Utc>) -> Self {
         Self {
-            scheduler: Scheduler::new(parameters, card, now),
+            scheduler: Base::new(parameters, card, now),
         }
     }
     fn new_state(&mut self, rating: Rating) -> SchedulingInfo {
@@ -281,10 +281,8 @@ impl BasicScheduler {
         next_good.state = Review;
         next_easy.state = Review;
     }
-}
 
-impl ImplScheduler for BasicScheduler {
-    fn review(&mut self, rating: Rating) -> SchedulingInfo {
+    pub fn review(&mut self, rating: Rating) -> SchedulingInfo {
         match self.scheduler.last.state {
             New => self.new_state(rating),
             Learning | Relearning => self.learning_state(rating),
