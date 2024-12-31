@@ -1,7 +1,7 @@
 use crate::{
     models::{Card, Rating, SchedulingInfo},
     parameters::Parameters,
-    Scheduler,
+    scheduler::Scheduler,
 };
 use chrono::{DateTime, Utc};
 
@@ -15,12 +15,12 @@ impl Fsrs {
         Self { parameters }
     }
 
-    pub fn scheduler(&self, card: Card, now: DateTime<Utc>) -> Scheduler {
-        Scheduler::new(self.parameters.clone(), card, now)
-    }
-
     pub fn next(&self, card: Card, now: DateTime<Utc>, rating: Rating) -> SchedulingInfo {
         self.scheduler(card, now).review(rating)
+    }
+
+    fn scheduler(&self, card: Card, now: DateTime<Utc>) -> Scheduler {
+        Scheduler::new(self.parameters.clone(), card, now)
     }
 }
 

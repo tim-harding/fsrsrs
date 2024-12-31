@@ -1,9 +1,7 @@
 mod cards;
 mod fuzz_range;
 mod prng;
-
 mod scheduler;
-pub use scheduler::Scheduler;
 
 mod fsrs;
 pub use fsrs::Fsrs;
