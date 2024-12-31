@@ -52,33 +52,24 @@ impl Basic {
     }
 
     fn review_learning(&mut self, rating: Rating) -> Card {
-        let mut next = self.0.current;
+        let mut card = self.0.current;
         let interval = self.0.current.elapsed_days;
-        next.difficulty = self
+        card.difficulty = self
             .0
             .parameters
             .next_difficulty(self.0.last.difficulty, rating);
-        next.stability = self
+        card.stability = self
             .0
             .parameters
             .short_term_stability(self.0.last.stability, rating);
 
-        match rating {
-            Again => {
-                next.scheduled_days = 0;
-                next.due = self.0.now + Duration::minutes(5);
-                next.state = self.0.last.state;
-            }
-            Hard => {
-                next.scheduled_days = 0;
-                next.due = self.0.now + Duration::minutes(10);
-                next.state = self.0.last.state;
-            }
+        let (days, due, state) = match rating {
+            Again => (0, Duration::minutes(5), self.0.last.state),
+            Hard => (0, Duration::minutes(10), self.0.last.state),
             Good => {
-                let good_interval = self.0.parameters.next_interval(next.stability, interval);
-                next.scheduled_days = good_interval as i64;
-                next.due = self.0.now + Duration::days(good_interval as i64);
-                next.state = Review;
+                let good_interval =
+                    self.0.parameters.next_interval(card.stability, interval) as i64;
+                (good_interval, Duration::days(good_interval), Review)
             }
             Easy => {
                 let good_stability = self
@@ -89,15 +80,16 @@ impl Basic {
                 let easy_interval = self
                     .0
                     .parameters
-                    .next_interval(next.stability, interval)
-                    .max(good_interval + 1.0);
-                next.scheduled_days = easy_interval as i64;
-                next.due = self.0.now + Duration::days(easy_interval as i64);
-                next.state = Review;
+                    .next_interval(card.stability, interval)
+                    .max(good_interval + 1.0) as i64;
+                (easy_interval, Duration::days(easy_interval), Review)
             }
-        }
+        };
 
-        next
+        card.scheduled_days = days;
+        card.due = self.0.now + due;
+        card.state = state;
+        card
     }
 
     fn review_reviewing(&mut self, rating: Rating) -> Card {
