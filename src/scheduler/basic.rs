@@ -27,38 +27,28 @@ impl Basic {
     }
 
     fn review_new(&self, rating: Rating) -> Card {
-        let mut next = self.0.current;
-        next.difficulty = self.0.parameters.init_difficulty(rating);
-        next.stability = self.0.parameters.init_stability(rating);
+        let mut card = self.0.current;
+        card.difficulty = self.0.parameters.init_difficulty(rating);
+        card.stability = self.0.parameters.init_stability(rating);
 
-        match rating {
-            Again => {
-                next.scheduled_days = 0;
-                next.due = self.0.now + Duration::minutes(1);
-                next.state = Learning;
-            }
-            Hard => {
-                next.scheduled_days = 0;
-                next.due = self.0.now + Duration::minutes(5);
-                next.state = Learning;
-            }
-            Good => {
-                next.scheduled_days = 0;
-                next.due = self.0.now + Duration::minutes(10);
-                next.state = Learning;
-            }
+        let (days, due, state) = match rating {
+            Again => (0, Duration::minutes(1), Learning),
+            Hard => (0, Duration::minutes(5), Learning),
+            Good => (0, Duration::minutes(10), Learning),
             Easy => {
                 let easy_interval = self
                     .0
                     .parameters
-                    .next_interval(next.stability, next.elapsed_days);
-                next.scheduled_days = easy_interval as i64;
-                next.due = self.0.now + Duration::days(easy_interval as i64);
-                next.state = Review;
+                    .next_interval(card.stability, card.elapsed_days)
+                    as i64;
+                (easy_interval, Duration::days(easy_interval), Review)
             }
         };
 
-        next
+        card.scheduled_days = days;
+        card.due = self.0.now + due;
+        card.state = state;
+        card
     }
 
     fn review_learning(&mut self, rating: Rating) -> Card {
