@@ -154,13 +154,34 @@ impl Basic {
                 .parameters
                 .next_stability(difficulty, stability, retrievability, Easy);
 
-        self.next_interval(
-            &mut next_again,
-            &mut next_hard,
-            &mut next_good,
-            &mut next_easy,
-            interval,
-        );
+        let mut hard_interval = self
+            .0
+            .parameters
+            .next_interval(next_hard.stability, interval);
+        let mut good_interval = self
+            .0
+            .parameters
+            .next_interval(next_good.stability, interval);
+        hard_interval = hard_interval.min(good_interval);
+        good_interval = good_interval.max(hard_interval + 1.0);
+        let easy_interval = self
+            .0
+            .parameters
+            .next_interval(next_easy.stability, interval)
+            .max(good_interval + 1.0);
+
+        next_again.scheduled_days = 0;
+        next_again.due = self.0.now + Duration::minutes(5);
+
+        next_hard.scheduled_days = hard_interval as i64;
+        next_hard.due = self.0.now + Duration::days(hard_interval as i64);
+
+        next_good.scheduled_days = good_interval as i64;
+        next_good.due = self.0.now + Duration::days(good_interval as i64);
+
+        next_easy.scheduled_days = easy_interval as i64;
+        next_easy.due = self.0.now + Duration::days(easy_interval as i64);
+
         next_again.state = Self::next_state(Again);
         next_hard.state = Self::next_state(Hard);
         next_good.state = Self::next_state(Good);
@@ -190,43 +211,6 @@ impl Basic {
         self.0.next.insert(Easy, item_easy);
 
         self.0.next.get(&rating).unwrap().to_owned()
-    }
-
-    fn next_interval(
-        &self,
-        next_again: &mut Card,
-        next_hard: &mut Card,
-        next_good: &mut Card,
-        next_easy: &mut Card,
-        elapsed_days: i64,
-    ) {
-        let mut hard_interval = self
-            .0
-            .parameters
-            .next_interval(next_hard.stability, elapsed_days);
-        let mut good_interval = self
-            .0
-            .parameters
-            .next_interval(next_good.stability, elapsed_days);
-        hard_interval = hard_interval.min(good_interval);
-        good_interval = good_interval.max(hard_interval + 1.0);
-        let easy_interval = self
-            .0
-            .parameters
-            .next_interval(next_easy.stability, elapsed_days)
-            .max(good_interval + 1.0);
-
-        next_again.scheduled_days = 0;
-        next_again.due = self.0.now + Duration::minutes(5);
-
-        next_hard.scheduled_days = hard_interval as i64;
-        next_hard.due = self.0.now + Duration::days(hard_interval as i64);
-
-        next_good.scheduled_days = good_interval as i64;
-        next_good.due = self.0.now + Duration::days(good_interval as i64);
-
-        next_easy.scheduled_days = easy_interval as i64;
-        next_easy.due = self.0.now + Duration::days(easy_interval as i64);
     }
 
     fn next_state(rating: Rating) -> State {
