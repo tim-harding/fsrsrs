@@ -18,23 +18,23 @@ impl Scheduler {
         })
     }
 
-    pub fn next_card(&mut self, rating: Rating) -> Card {
-        match &mut self.0 {
+    pub fn next_card(&self, rating: Rating) -> Card {
+        match &self.0 {
             Inner::Basic(basic) => basic.next_card(rating),
             Inner::Longterm(longterm) => longterm.review(rating).card,
         }
     }
 
-    pub fn current_review(&mut self, rating: Rating) -> Review {
-        match &mut self.0 {
+    pub fn current_review(&self, rating: Rating) -> Review {
+        match &self.0 {
             Inner::Basic(basic) => basic.current_review(rating),
             Inner::Longterm(longterm) => longterm.review(rating).review,
         }
     }
 
     // TODO: Take &self
-    pub fn schedule(&mut self, rating: Rating) -> Schedule {
-        match &mut self.0 {
+    pub fn schedule(&self, rating: Rating) -> Schedule {
+        match &self.0 {
             Inner::Basic(basic) => basic.schedule(rating),
             Inner::Longterm(longterm) => longterm.review(rating),
         }

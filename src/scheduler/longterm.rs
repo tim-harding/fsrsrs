@@ -14,18 +14,17 @@ impl Longterm {
         Self(Base::new(parameters, card, now))
     }
 
-    pub fn review(&mut self, rating: Rating) -> Schedule {
+    pub fn review(&self, rating: Rating) -> Schedule {
         match self.0.last.state {
             New => self.review_new(rating),
-            Learning | Relearning => self.review_learning(rating),
-            Reviewing => self.review_reviewing(rating),
+            Learning | Relearning | Reviewing => self.review_reviewing(rating),
         }
     }
 
-    fn review_new(&mut self, rating: Rating) -> Schedule {
-        let next = self.0.current;
-        self.0.current.scheduled_days = 0;
-        self.0.current.elapsed_days = 0;
+    fn review_new(&self, rating: Rating) -> Schedule {
+        let mut next = self.0.current;
+        next.scheduled_days = 0;
+        next.elapsed_days = 0;
 
         let mut next_again = next;
         let mut next_hard = next;
@@ -77,11 +76,7 @@ impl Longterm {
         }
     }
 
-    fn review_learning(&mut self, rating: Rating) -> Schedule {
-        self.review_reviewing(rating)
-    }
-
-    fn review_reviewing(&mut self, rating: Rating) -> Schedule {
+    fn review_reviewing(&self, rating: Rating) -> Schedule {
         let next = self.0.current;
         let interval = self.0.current.elapsed_days;
         let stability = self.0.last.stability;
@@ -280,13 +275,13 @@ mod tests {
 
         for rating in TEST_RATINGS.into_iter() {
             let next = {
-                let mut scheduler = Longterm::new(params.clone(), card, now);
+                let scheduler = Longterm::new(params.clone(), card, now);
                 let schedule = scheduler.review(rating);
                 schedule.card
             };
 
             card = {
-                let mut scheduler = Longterm::new(params.clone(), card, now);
+                let scheduler = Longterm::new(params.clone(), card, now);
                 let schedule = scheduler.review(rating);
                 schedule.card
             };
