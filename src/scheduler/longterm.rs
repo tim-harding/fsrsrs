@@ -110,17 +110,18 @@ impl Longterm {
         next_good: &mut Card,
         next_easy: &mut Card,
     ) {
-        next_again.difficulty = self.0.parameters.init_difficulty(Again);
-        next_again.stability = self.0.parameters.init_stability(Again);
+        let p = &self.0.parameters;
+        next_again.difficulty = p.init_difficulty(Again);
+        next_again.stability = p.init_stability(Again);
 
-        next_hard.difficulty = self.0.parameters.init_difficulty(Hard);
-        next_hard.stability = self.0.parameters.init_stability(Hard);
+        next_hard.difficulty = p.init_difficulty(Hard);
+        next_hard.stability = p.init_stability(Hard);
 
-        next_good.difficulty = self.0.parameters.init_difficulty(Good);
-        next_good.stability = self.0.parameters.init_stability(Good);
+        next_good.difficulty = p.init_difficulty(Good);
+        next_good.stability = p.init_stability(Good);
 
-        next_easy.difficulty = self.0.parameters.init_difficulty(Easy);
-        next_easy.stability = self.0.parameters.init_stability(Easy);
+        next_easy.difficulty = p.init_difficulty(Easy);
+        next_easy.stability = p.init_stability(Easy);
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -134,29 +135,19 @@ impl Longterm {
         stability: f64,
         retrievability: f64,
     ) {
-        next_again.difficulty = self.0.parameters.next_difficulty(difficulty, Again);
-        next_again.stability =
-            self.0
-                .parameters
-                .next_forget_stability(difficulty, stability, retrievability);
+        let p = &self.0.parameters;
 
-        next_hard.difficulty = self.0.parameters.next_difficulty(difficulty, Hard);
-        next_hard.stability =
-            self.0
-                .parameters
-                .next_recall_stability(difficulty, stability, retrievability, Hard);
+        next_again.difficulty = p.next_difficulty(difficulty, Again);
+        next_again.stability = p.next_forget_stability(difficulty, stability, retrievability);
 
-        next_good.difficulty = self.0.parameters.next_difficulty(difficulty, Good);
-        next_good.stability =
-            self.0
-                .parameters
-                .next_recall_stability(difficulty, stability, retrievability, Good);
+        next_hard.difficulty = p.next_difficulty(difficulty, Hard);
+        next_hard.stability = p.next_recall_stability(difficulty, stability, retrievability, Hard);
 
-        next_easy.difficulty = self.0.parameters.next_difficulty(difficulty, Easy);
-        next_easy.stability =
-            self.0
-                .parameters
-                .next_recall_stability(difficulty, stability, retrievability, Easy);
+        next_good.difficulty = p.next_difficulty(difficulty, Good);
+        next_good.stability = p.next_recall_stability(difficulty, stability, retrievability, Good);
+
+        next_easy.difficulty = p.next_difficulty(difficulty, Easy);
+        next_easy.stability = p.next_recall_stability(difficulty, stability, retrievability, Easy);
     }
 
     fn next_interval(
@@ -167,22 +158,11 @@ impl Longterm {
         next_easy: &mut Card,
         elapsed_days: i64,
     ) {
-        let mut again_interval = self
-            .0
-            .parameters
-            .next_interval(next_again.stability, elapsed_days);
-        let mut hard_interval = self
-            .0
-            .parameters
-            .next_interval(next_hard.stability, elapsed_days);
-        let mut good_interval = self
-            .0
-            .parameters
-            .next_interval(next_good.stability, elapsed_days);
-        let mut easy_interval = self
-            .0
-            .parameters
-            .next_interval(next_easy.stability, elapsed_days);
+        let p = &self.0.parameters;
+        let mut again_interval = p.next_interval(next_again.stability, elapsed_days);
+        let mut hard_interval = p.next_interval(next_hard.stability, elapsed_days);
+        let mut good_interval = p.next_interval(next_good.stability, elapsed_days);
+        let mut easy_interval = p.next_interval(next_easy.stability, elapsed_days);
 
         again_interval = again_interval.min(hard_interval);
         hard_interval = hard_interval.max(again_interval + 1.0);
