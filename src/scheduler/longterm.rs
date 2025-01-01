@@ -2,7 +2,7 @@ use super::base::Base;
 use crate::{
     Card, Parameters,
     Rating::{self, *},
-    Schedule,
+    Review,
     State::*,
 };
 use chrono::{DateTime, Duration, Utc};
@@ -14,14 +14,18 @@ impl Longterm {
         Self(Base::new(parameters, card, now))
     }
 
-    pub fn review(&self, rating: Rating) -> Schedule {
+    pub fn next_card(&self, rating: Rating) -> Card {
         match self.0.last.state {
             New => self.review_new(rating),
             Learning | Relearning | Reviewing => self.review_reviewing(rating),
         }
     }
 
-    fn review_new(&self, rating: Rating) -> Schedule {
+    pub fn current_review(&self, rating: Rating) -> Review {
+        self.0.current_review(rating)
+    }
+
+    fn review_new(&self, rating: Rating) -> Card {
         let mut next = self.0.current;
         next.scheduled_days = 0;
         next.elapsed_days = 0;
@@ -51,32 +55,15 @@ impl Longterm {
             &mut next_easy,
         );
 
-        let item_again = Schedule {
-            card: next_again,
-            review: self.0.current_review(Again),
-        };
-        let item_hard = Schedule {
-            card: next_hard,
-            review: self.0.current_review(Hard),
-        };
-        let item_good = Schedule {
-            card: next_good,
-            review: self.0.current_review(Good),
-        };
-        let item_easy = Schedule {
-            card: next_easy,
-            review: self.0.current_review(Easy),
-        };
-
         match rating {
-            Again => item_again,
-            Hard => item_hard,
-            Good => item_good,
-            Easy => item_easy,
+            Again => next_again,
+            Hard => next_hard,
+            Good => next_good,
+            Easy => next_easy,
         }
     }
 
-    fn review_reviewing(&self, rating: Rating) -> Schedule {
+    fn review_reviewing(&self, rating: Rating) -> Card {
         let next = self.0.current;
         let interval = self.0.current.elapsed_days;
         let stability = self.0.last.stability;
@@ -112,28 +99,11 @@ impl Longterm {
         );
         next_again.lapses += 1;
 
-        let item_again = Schedule {
-            card: next_again,
-            review: self.0.current_review(Again),
-        };
-        let item_hard = Schedule {
-            card: next_hard,
-            review: self.0.current_review(Hard),
-        };
-        let item_good = Schedule {
-            card: next_good,
-            review: self.0.current_review(Good),
-        };
-        let item_easy = Schedule {
-            card: next_easy,
-            review: self.0.current_review(Easy),
-        };
-
         match rating {
-            Again => item_again,
-            Hard => item_hard,
-            Good => item_good,
-            Easy => item_easy,
+            Again => next_again,
+            Hard => next_hard,
+            Good => next_good,
+            Easy => next_easy,
         }
     }
 
@@ -276,14 +246,12 @@ mod tests {
         for rating in TEST_RATINGS.into_iter() {
             let next = {
                 let scheduler = Longterm::new(params.clone(), card, now);
-                let schedule = scheduler.review(rating);
-                schedule.card
+                scheduler.next_card(rating)
             };
 
             card = {
                 let scheduler = Longterm::new(params.clone(), card, now);
-                let schedule = scheduler.review(rating);
-                schedule.card
+                scheduler.next_card(rating)
             };
 
             assert_eq!(card, next);

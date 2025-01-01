@@ -21,22 +21,21 @@ impl Scheduler {
     pub fn next_card(&self, rating: Rating) -> Card {
         match &self.0 {
             Inner::Basic(basic) => basic.next_card(rating),
-            Inner::Longterm(longterm) => longterm.review(rating).card,
+            Inner::Longterm(longterm) => longterm.next_card(rating),
         }
     }
 
     pub fn current_review(&self, rating: Rating) -> Review {
         match &self.0 {
             Inner::Basic(basic) => basic.current_review(rating),
-            Inner::Longterm(longterm) => longterm.review(rating).review,
+            Inner::Longterm(longterm) => longterm.current_review(rating),
         }
     }
 
-    // TODO: Take &self
     pub fn schedule(&self, rating: Rating) -> Schedule {
-        match &self.0 {
-            Inner::Basic(basic) => basic.schedule(rating),
-            Inner::Longterm(longterm) => longterm.review(rating),
+        Schedule {
+            card: self.next_card(rating),
+            review: self.current_review(rating),
         }
     }
 }

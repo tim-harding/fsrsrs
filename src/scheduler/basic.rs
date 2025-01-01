@@ -3,7 +3,7 @@ use crate::{
     cards::Cards,
     Card, Parameters,
     Rating::{self, *},
-    Review, Schedule,
+    Review,
     State::{self, *},
 };
 use chrono::{DateTime, Duration, Utc};
@@ -13,14 +13,6 @@ pub struct Basic(Base);
 impl Basic {
     pub fn new(parameters: Parameters, card: Card, now: DateTime<Utc>) -> Self {
         Self(Base::new(parameters, card, now))
-    }
-
-    // TODO: Move this into Scheduler only
-    pub fn schedule(&self, rating: Rating) -> Schedule {
-        Schedule {
-            card: self.next_card(rating),
-            review: self.current_review(rating),
-        }
     }
 
     pub fn next_card(&self, rating: Rating) -> Card {
@@ -193,9 +185,9 @@ mod tests {
         let mut state_list = vec![];
 
         for rating in TEST_RATINGS.into_iter() {
-            let record = Basic::new(params.clone(), card, now).schedule(rating);
-            card = record.card;
-            let rev_log = record.review;
+            let scheduler = Basic::new(params.clone(), card, now);
+            card = scheduler.next_card(rating);
+            let rev_log = scheduler.current_review(rating);
             state_list.push(rev_log.state);
             now = card.due;
         }
