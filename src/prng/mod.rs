@@ -46,7 +46,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_prng_get_state() {
+    fn get_state() {
         let prng_1 = Prng::new("1");
         let prng_2 = Prng::new("2");
         let prng_3 = Prng::new("1");
@@ -60,7 +60,7 @@ mod tests {
     }
 
     #[test]
-    fn test_alea_get_next() {
+    fn get_next() {
         let mut generator = Prng::new("12345");
         assert_eq!(generator.gen_next(), 0.27138191112317145);
         assert_eq!(generator.gen_next(), 0.19615925149992108);
@@ -68,7 +68,7 @@ mod tests {
     }
 
     #[test]
-    fn test_alea_int32() {
+    fn int32() {
         let mut generator = Prng::new("12345");
         assert_eq!(generator.int32(), 1165576433);
         assert_eq!(generator.int32(), 842497570);
@@ -76,7 +76,7 @@ mod tests {
     }
 
     #[test]
-    fn test_alea_import_state() {
+    fn import_state() {
         let mut prng_1 = Prng::new("Whatever");
         prng_1.gen_next();
         prng_1.gen_next();
@@ -98,7 +98,7 @@ mod tests {
     }
 
     #[test]
-    fn test_seed_example_1() {
+    fn seed_1() {
         let mut generator = Prng::new("1727015666066");
         let results = generator.gen_next();
         let state = generator.xg;
@@ -114,7 +114,7 @@ mod tests {
     }
 
     #[test]
-    fn test_seed_example_2() {
+    fn seed_2() {
         let mut generator = Prng::new("Seedp5fxh9kf4r0");
         let results = generator.gen_next();
         let state = generator.xg;
@@ -130,7 +130,7 @@ mod tests {
     }
 
     #[test]
-    fn test_seed_example_3() {
+    fn seed_3() {
         let mut generator = Prng::new("NegativeS2Seed");
         let results = generator.gen_next();
         let state = generator.xg;

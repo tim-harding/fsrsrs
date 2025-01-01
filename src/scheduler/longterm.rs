@@ -265,7 +265,7 @@ mod tests {
     };
 
     #[test]
-    fn test_long_term_scheduler() {
+    fn longterm() {
         let params = Parameters {
             w: WEIGHTS,
             enable_short_term: false,

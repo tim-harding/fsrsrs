@@ -166,7 +166,7 @@ mod tests {
     use chrono::Duration;
 
     #[test]
-    fn test_basic_scheduler_interval() {
+    fn interval() {
         let mut card = Card::new();
         let mut now = string_to_utc("2022-11-29 12:30:00 +0000 UTC");
         let mut interval_history = vec![];
@@ -182,7 +182,7 @@ mod tests {
     }
 
     #[test]
-    fn test_basic_scheduler_state() {
+    fn state() {
         let params = Parameters {
             w: WEIGHTS,
             ..Default::default()
@@ -208,7 +208,7 @@ mod tests {
     }
 
     #[test]
-    fn test_basic_scheduler_memo_state() {
+    fn memo_state() {
         let params = Parameters {
             w: WEIGHTS,
             ..Default::default()
@@ -236,7 +236,7 @@ mod tests {
     }
 
     #[test]
-    fn test_get_retrievability() {
+    fn retrievability() {
         let card = Card::new();
         let now = string_to_utc("2022-11-29 12:30:00 +0000 UTC");
         let expect_retrievability = [1.0, 1.0, 1.0, 0.9026208];
