@@ -14,7 +14,15 @@ impl Longterm {
         Self(Base::new(parameters, card, now))
     }
 
-    fn new_state(&mut self, rating: Rating) -> Schedule {
+    pub fn review(&mut self, rating: Rating) -> Schedule {
+        match self.0.last.state {
+            New => self.review_new(rating),
+            Learning | Relearning => self.review_learning(rating),
+            Reviewing => self.review_reviewing(rating),
+        }
+    }
+
+    fn review_new(&mut self, rating: Rating) -> Schedule {
         let next = self.0.current;
         self.0.current.scheduled_days = 0;
         self.0.current.elapsed_days = 0;
@@ -69,11 +77,11 @@ impl Longterm {
         }
     }
 
-    fn learning_state(&mut self, rating: Rating) -> Schedule {
-        self.review_state(rating)
+    fn review_learning(&mut self, rating: Rating) -> Schedule {
+        self.review_reviewing(rating)
     }
 
-    fn review_state(&mut self, rating: Rating) -> Schedule {
+    fn review_reviewing(&mut self, rating: Rating) -> Schedule {
         let next = self.0.current;
         let interval = self.0.current.elapsed_days;
         let stability = self.0.last.stability;
@@ -244,14 +252,6 @@ impl Longterm {
         next_hard.state = Reviewing;
         next_good.state = Reviewing;
         next_easy.state = Reviewing;
-    }
-
-    pub fn review(&mut self, rating: Rating) -> Schedule {
-        match self.0.last.state {
-            New => self.new_state(rating),
-            Learning | Relearning => self.learning_state(rating),
-            Reviewing => self.review_state(rating),
-        }
     }
 }
 
