@@ -48,12 +48,10 @@ impl Longterm {
             &mut next_easy,
             0,
         );
-        self.next_state(
-            &mut next_again,
-            &mut next_hard,
-            &mut next_good,
-            &mut next_easy,
-        );
+        next_again.state = Reviewing;
+        next_hard.state = Reviewing;
+        next_good.state = Reviewing;
+        next_easy.state = Reviewing;
 
         match rating {
             Again => next_again,
@@ -91,12 +89,10 @@ impl Longterm {
             &mut next_easy,
             interval,
         );
-        self.next_state(
-            &mut next_again,
-            &mut next_hard,
-            &mut next_good,
-            &mut next_easy,
-        );
+        next_again.state = Reviewing;
+        next_hard.state = Reviewing;
+        next_good.state = Reviewing;
+        next_easy.state = Reviewing;
         next_again.lapses += 1;
 
         match rating {
@@ -204,19 +200,6 @@ impl Longterm {
 
         next_easy.scheduled_days = easy_interval as i64;
         next_easy.due = self.0.now + Duration::days(easy_interval as i64);
-    }
-
-    fn next_state(
-        &self,
-        next_again: &mut Card,
-        next_hard: &mut Card,
-        next_good: &mut Card,
-        next_easy: &mut Card,
-    ) {
-        next_again.state = Reviewing;
-        next_hard.state = Reviewing;
-        next_good.state = Reviewing;
-        next_easy.state = Reviewing;
     }
 }
 
