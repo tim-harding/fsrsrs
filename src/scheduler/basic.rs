@@ -23,8 +23,8 @@ impl Basic {
         }
     }
 
-    pub const fn current_review(&self, rating: Rating) -> Review {
-        self.0.current_review(rating)
+    pub fn current_review(&self, rating: Rating, card: Card) -> Review {
+        self.0.current_review(rating, card)
     }
 
     fn review_new(&self, rating: Rating) -> Card {
@@ -34,17 +34,16 @@ impl Basic {
         card.difficulty = p.init_difficulty(rating);
         card.stability = p.init_stability(rating);
 
-        let (days, due, state) = match rating {
-            Again => (0, Duration::minutes(1), Learning),
-            Hard => (0, Duration::minutes(5), Learning),
-            Good => (0, Duration::minutes(10), Learning),
+        let (due, state) = match rating {
+            Again => (Duration::minutes(1), Learning),
+            Hard => (Duration::minutes(5), Learning),
+            Good => (Duration::minutes(10), Learning),
             Easy => {
                 let easy_interval = p.next_interval(card.stability, card.elapsed_days) as i64;
-                (easy_interval, Duration::days(easy_interval), Reviewing)
+                (Duration::days(easy_interval), Reviewing)
             }
         };
 
-        card.scheduled_days = days;
         card.due = self.0.now + due;
         card.state = state;
         card
@@ -76,7 +75,6 @@ impl Basic {
             }
         };
 
-        card.scheduled_days = due.num_days();
         card.due = self.0.now + due;
         card.state = state;
         card
@@ -103,7 +101,6 @@ impl Basic {
         };
 
         let mut card = cards[rating];
-        card.scheduled_days = due.num_days();
         card.due = self.0.now + due;
         card.lapses += lapses;
         card.state = next_state(rating);
@@ -153,7 +150,8 @@ mod tests {
         for rating in TEST_RATINGS.into_iter() {
             let scheduler = Basic::new(Parameters::default(), card, now);
             card = scheduler.next_card(rating);
-            interval_history.push(card.scheduled_days);
+            let review = scheduler.current_review(rating, card);
+            interval_history.push(review.scheduled_days);
             now = card.due;
         }
         let expected = [0, 4, 15, 48, 136, 351, 0, 0, 7, 13, 24, 43, 77];
@@ -174,7 +172,7 @@ mod tests {
         for rating in TEST_RATINGS.into_iter() {
             let scheduler = Basic::new(params, card, now);
             card = scheduler.next_card(rating);
-            let rev_log = scheduler.current_review(rating);
+            let rev_log = scheduler.current_review(rating, card);
             state_list.push(rev_log.state);
             now = card.due;
         }

@@ -25,17 +25,18 @@ impl Scheduler {
         }
     }
 
-    pub fn current_review(&self, rating: Rating) -> Review {
+    pub fn current_review(&self, rating: Rating, card: Card) -> Review {
         match &self.0 {
-            Inner::Basic(basic) => basic.current_review(rating),
-            Inner::Longterm(longterm) => longterm.current_review(rating),
+            Inner::Basic(basic) => basic.current_review(rating, card),
+            Inner::Longterm(longterm) => longterm.current_review(rating, card),
         }
     }
 
     pub fn schedule(&self, rating: Rating) -> Schedule {
+        let card = self.next_card(rating);
         Schedule {
-            card: self.next_card(rating),
-            review: self.current_review(rating),
+            card,
+            review: self.current_review(rating, card),
         }
     }
 }

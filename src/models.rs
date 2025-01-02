@@ -10,7 +10,6 @@ pub struct Card {
     pub stability: f64,
     pub difficulty: f64,
     pub elapsed_days: i64,
-    pub scheduled_days: i64,
     pub reps: i32,
     pub lapses: i32,
 }

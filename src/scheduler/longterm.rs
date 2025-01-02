@@ -22,15 +22,14 @@ impl Longterm {
         }
     }
 
-    pub fn current_review(&self, rating: Rating) -> Review {
-        self.0.current_review(rating)
+    pub fn current_review(&self, rating: Rating, card: Card) -> Review {
+        self.0.current_review(rating, card)
     }
 
     fn review_new(&self, rating: Rating) -> Card {
         let p = &self.0.parameters;
         let mut next = self.0.current;
 
-        next.scheduled_days = 0;
         next.elapsed_days = 0;
         next.stability = p.init_stability(rating);
         next.difficulty = p.init_difficulty(rating);
@@ -38,7 +37,6 @@ impl Longterm {
 
         let interval =
             self.next_interval(Cards::from_fn(|rating| p.init_stability(rating)), 0, rating);
-        next.scheduled_days = interval;
         next.due = self.0.now + Duration::days(interval);
 
         next
@@ -71,7 +69,6 @@ impl Longterm {
             rating,
         );
 
-        next.scheduled_days = interval;
         next.due = self.0.now + Duration::days(interval);
 
         next
@@ -114,19 +111,11 @@ mod tests {
         let mut difficulty_history = vec![];
 
         for rating in TEST_RATINGS.into_iter() {
-            let next = {
-                let scheduler = Longterm::new(params, card, now);
-                scheduler.next_card(rating)
-            };
+            let scheduler = Longterm::new(params, card, now);
+            card = scheduler.next_card(rating);
+            let review = scheduler.current_review(rating, card);
 
-            card = {
-                let scheduler = Longterm::new(params, card, now);
-                scheduler.next_card(rating)
-            };
-
-            assert_eq!(card, next);
-
-            interval_history.push(card.scheduled_days);
+            interval_history.push(review.scheduled_days);
             stability_history.push(card.stability.round_float(4));
             difficulty_history.push(card.difficulty.round_float(4));
             now = card.due;

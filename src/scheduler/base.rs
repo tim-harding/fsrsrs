@@ -27,14 +27,13 @@ impl Base {
         }
     }
 
-    pub const fn current_review(self, rating: Rating) -> Review {
+    pub fn current_review(self, rating: Rating, card: Card) -> Review {
         let Self {
             now: reviewed_date,
             current:
                 Card {
                     state,
                     elapsed_days,
-                    scheduled_days,
                     ..
                 },
             ..
@@ -44,7 +43,7 @@ impl Base {
             rating,
             state,
             elapsed_days,
-            scheduled_days,
+            scheduled_days: (card.due - self.now).num_days(),
             reviewed_date,
         }
     }
