@@ -7,21 +7,19 @@ pub struct Parameters {
     pub(crate) w: Weights,
     pub(crate) request_retention: f64,
     pub(crate) maximum_interval: i32,
-    pub(crate) decay: f64,
-    pub(crate) factor: f64,
     pub(crate) enable_short_term: bool,
 }
 
 impl Parameters {
-    pub(crate) const DECAY: f64 = -0.5;
-    pub(crate) const FACTOR: f64 = 19f64 / 81f64; // (9/10) ^ (1 / DECAY) - 1
-    pub(crate) const WEIGHTS: Weights = [
+    pub const DECAY: f64 = -0.5;
+    pub const FACTOR: f64 = 19f64 / 81f64;
+    pub(crate) const DEFAULT_WEIGHTS: Weights = [
         0.4072, 1.1829, 3.1262, 15.4722, 7.2102, 0.5316, 1.0651, 0.0234, 1.616, 0.1544, 1.0824,
         1.9813, 0.0953, 0.2975, 2.2042, 0.2407, 2.9466, 0.5034, 0.6567,
     ];
 
     pub(crate) fn forgetting_curve(&self, elapsed_days: f64, stability: f64) -> f64 {
-        (1.0 + self.factor * elapsed_days / stability).powf(self.decay)
+        (1.0 + Self::FACTOR * elapsed_days / stability).powf(Self::DECAY)
     }
 
     pub(crate) fn init_difficulty(&self, rating: Rating) -> f64 {
