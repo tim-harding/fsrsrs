@@ -1,4 +1,4 @@
-use crate::{cards::Cards, Card, Parameters, Rating, State::*};
+use crate::{Card, Parameters, Rating, State::*};
 use chrono::{DateTime, Duration, Utc};
 
 pub struct Longterm {
@@ -36,10 +36,8 @@ impl Longterm {
             ..self.card
         };
 
-        let interval =
-            self.next_interval(Cards::from_fn(|rating| p.init_stability(rating)), rating);
-        next.due = self.now + Duration::days(interval);
-
+        let interval = self.parameters.next_interval(next.stability);
+        next.due = self.now + Duration::days(interval as i64);
         next
     }
 
@@ -56,27 +54,9 @@ impl Longterm {
             ..self.card
         };
 
-        let interval = self.next_interval(
-            Cards::from_fn(|rating| {
-                p.next_stability(difficulty, stability, retrievability, rating)
-            }),
-            rating,
-        );
-
-        next.due = self.now + Duration::days(interval);
-
+        let interval = self.parameters.next_interval(next.stability);
+        next.due = self.now + Duration::days(interval as i64);
         next
-    }
-
-    fn next_interval(&self, stability: Cards<f64>, rating: Rating) -> i64 {
-        let mut interval = stability.map(|(_, stability)| self.parameters.next_interval(stability));
-
-        interval.again = interval.again.min(interval.hard);
-        interval.hard = interval.hard.max(interval.again + 1.0);
-        interval.good = interval.good.max(interval.hard + 1.0);
-        interval.easy = interval.easy.max(interval.good + 1.0);
-
-        interval[rating] as i64
     }
 }
 
