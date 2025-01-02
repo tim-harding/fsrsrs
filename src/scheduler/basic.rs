@@ -98,9 +98,7 @@ impl Basic {
 
         let (days, due, lapses) = match rating {
             Again => (0, Duration::minutes(5), 1),
-            Hard => (interval.hard(), Duration::days(interval.hard()), 0),
-            Good => (interval.good(), Duration::days(interval.good()), 0),
-            Easy => (interval.easy(), Duration::days(interval.easy()), 0),
+            Hard | Good | Easy => (interval[rating], Duration::days(interval[rating]), 0),
         };
 
         let mut card = cards[rating];
@@ -113,16 +111,16 @@ impl Basic {
 
     fn review_intervals(&self, stability: Cards<f64>, interval_previous: i64) -> Cards<i64> {
         let p = &self.0.parameters;
-
         let mut interval = Cards::splat(0.0f64);
 
-        interval[Hard] = p.next_interval(stability.hard(), interval_previous);
-        interval[Good] = p.next_interval(stability.good(), interval_previous);
-        interval[Hard] = interval.hard().min(interval.good());
-        interval[Good] = interval.good().max(interval.hard() + 1.0);
-        interval[Easy] = p
-            .next_interval(stability.easy(), interval_previous)
-            .max(interval.good() + 1.0);
+        interval.hard = p.next_interval(stability.hard, interval_previous);
+        interval.good = p.next_interval(stability.good, interval_previous);
+        interval.hard = interval.hard.min(interval.good);
+        interval.good = interval.good.max(interval.hard + 1.0);
+        interval.easy = p
+            .next_interval(stability.easy, interval_previous)
+            .max(interval.good + 1.0);
+
         interval.map(|(_, i)| i as i64)
     }
 }
