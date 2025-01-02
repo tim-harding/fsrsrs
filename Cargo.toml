@@ -2,7 +2,7 @@
 name = "fsrsrs"
 version = "0.1.0"
 edition = "2021"
-license = "LICENSE"
+license-file = "LICENSE"
 description = "Rust-based FSRS scheduler"
 
 [dependencies]
