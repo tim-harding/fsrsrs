@@ -1,5 +1,4 @@
 use crate::{
-    cards::Cards,
     Card, Parameters,
     Rating::{self, *},
     State::{self, *},
@@ -93,38 +92,21 @@ impl Basic {
         let difficulty = self.card.difficulty;
         let retrievability = self.card.retrievability(p, self.now);
 
-        let mut cards = Cards::splat(Card {
+        let mut card = Card {
+            difficulty: p.next_difficulty(difficulty, rating),
+            stability: p.next_stability(difficulty, stability, retrievability, rating),
             reviewed_at: self.now,
             ..self.card
-        });
-        cards.update(|(rating, card)| {
-            card.difficulty = p.next_difficulty(difficulty, rating);
-            card.stability = p.next_stability(difficulty, stability, retrievability, rating);
-        });
+        };
 
-        let interval = self.review_intervals(cards.map(|(_, card)| card.stability));
-
-        let mut card = cards[rating];
+        let interval = self.parameters.next_interval(card.stability);
         card.due = self.now
             + (match rating {
                 Again => Duration::minutes(5),
-                Hard | Good | Easy => Duration::days(interval[rating]),
+                Hard | Good | Easy => Duration::days(interval as i64),
             });
         card.state = next_state(rating);
         card
-    }
-
-    fn review_intervals(&self, stability: Cards<f64>) -> Cards<i64> {
-        let p = &self.parameters;
-        let mut interval = Cards::splat(0.0f64);
-
-        interval.hard = p.next_interval(stability.hard);
-        interval.good = p.next_interval(stability.good);
-        interval.hard = interval.hard.min(interval.good);
-        interval.good = interval.good.max(interval.hard + 1.0);
-        interval.easy = p.next_interval(stability.easy).max(interval.good + 1.0);
-
-        interval.map(|(_, i)| i as i64)
     }
 }
 
