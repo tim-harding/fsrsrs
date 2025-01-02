@@ -47,11 +47,6 @@ impl Parameters {
         mean_reversion.clamp(1.0, 10.0)
     }
 
-    pub(crate) fn short_term_stability(&self, stability: f64, rating: Rating) -> f64 {
-        let rating_int = rating as i32;
-        stability * f64::exp(self.w[17] * (rating_int as f64 - 3.0 + self.w[18]))
-    }
-
     pub(crate) fn next_stability(
         &self,
         difficulty: f64,
