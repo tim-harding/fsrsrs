@@ -1,4 +1,3 @@
-use super::base::Base;
 use crate::{
     cards::Cards,
     Card, Parameters,
@@ -7,15 +6,23 @@ use crate::{
 };
 use chrono::{DateTime, Duration, Utc};
 
-pub struct Basic(Base);
+pub struct Basic {
+    pub now: DateTime<Utc>,
+    pub parameters: Parameters,
+    pub card: Card,
+}
 
 impl Basic {
     pub fn new(parameters: Parameters, card: Card, now: DateTime<Utc>) -> Self {
-        Self(Base::new(parameters, card, now))
+        Self {
+            parameters,
+            card,
+            now,
+        }
     }
 
     pub fn next_card(&self, rating: Rating) -> Card {
-        let mut out = match self.0.card.state {
+        let mut out = match self.card.state {
             New => self.review_new(rating),
             Learning | Relearning => self.review_learning(rating),
             Reviewing => self.review_reviewing(rating),
@@ -25,13 +32,13 @@ impl Basic {
     }
 
     fn review_new(&self, rating: Rating) -> Card {
-        let p = &self.0.parameters;
+        let p = &self.parameters;
 
         let mut card = Card {
             difficulty: p.init_difficulty(rating),
             stability: p.init_stability(rating),
-            reviewed_at: self.0.now,
-            ..self.0.card
+            reviewed_at: self.now,
+            ..self.card
         };
 
         let (due, state) = match rating {
@@ -40,26 +47,26 @@ impl Basic {
             Good => (Duration::minutes(10), Learning),
             Easy => {
                 let easy_interval =
-                    p.next_interval(card.stability, card.elapsed_days(self.0.now)) as i64;
+                    p.next_interval(card.stability, card.elapsed_days(self.now)) as i64;
                 (Duration::days(easy_interval), Reviewing)
             }
         };
 
-        card.due = self.0.now + due;
+        card.due = self.now + due;
         card.state = state;
         card
     }
 
     fn review_learning(&self, rating: Rating) -> Card {
-        let p = &self.0.parameters;
-        let last = &self.0.card;
-        let interval = self.0.card.elapsed_days(self.0.now);
+        let p = &self.parameters;
+        let last = &self.card;
+        let interval = self.card.elapsed_days(self.now);
 
         let mut card = Card {
             difficulty: p.next_difficulty(last.difficulty, rating),
             stability: p.short_term_stability(last.stability, rating),
-            reviewed_at: self.0.now,
-            ..self.0.card
+            reviewed_at: self.now,
+            ..self.card
         };
 
         let (due, state) = match rating {
@@ -79,21 +86,21 @@ impl Basic {
             }
         };
 
-        card.due = self.0.now + due;
+        card.due = self.now + due;
         card.state = state;
         card
     }
 
     fn review_reviewing(&self, rating: Rating) -> Card {
-        let p = &self.0.parameters;
-        let interval = self.0.card.elapsed_days(self.0.now);
-        let stability = self.0.card.stability;
-        let difficulty = self.0.card.difficulty;
-        let retrievability = self.0.card.retrievability(p, self.0.now);
+        let p = &self.parameters;
+        let interval = self.card.elapsed_days(self.now);
+        let stability = self.card.stability;
+        let difficulty = self.card.difficulty;
+        let retrievability = self.card.retrievability(p, self.now);
 
         let mut cards = Cards::splat(Card {
-            reviewed_at: self.0.now,
-            ..self.0.card
+            reviewed_at: self.now,
+            ..self.card
         });
         cards.update(|(rating, card)| {
             card.difficulty = p.next_difficulty(difficulty, rating);
@@ -103,7 +110,7 @@ impl Basic {
         let interval = self.review_intervals(cards.map(|(_, card)| card.stability), interval);
 
         let mut card = cards[rating];
-        card.due = self.0.now
+        card.due = self.now
             + (match rating {
                 Again => Duration::minutes(5),
                 Hard | Good | Easy => Duration::days(interval[rating]),
@@ -113,7 +120,7 @@ impl Basic {
     }
 
     fn review_intervals(&self, stability: Cards<f64>, interval_previous: i64) -> Cards<i64> {
-        let p = &self.0.parameters;
+        let p = &self.parameters;
         let mut interval = Cards::splat(0.0f64);
 
         interval.hard = p.next_interval(stability.hard, interval_previous);

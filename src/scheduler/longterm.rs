@@ -1,16 +1,23 @@
-use super::base::Base;
 use crate::{cards::Cards, Card, Parameters, Rating, State::*};
 use chrono::{DateTime, Duration, Utc};
 
-pub struct Longterm(Base);
+pub struct Longterm {
+    pub now: DateTime<Utc>,
+    pub parameters: Parameters,
+    pub card: Card,
+}
 
 impl Longterm {
     pub fn new(parameters: Parameters, card: Card, now: DateTime<Utc>) -> Self {
-        Self(Base::new(parameters, card, now))
+        Self {
+            parameters,
+            card,
+            now,
+        }
     }
 
     pub fn next_card(&self, rating: Rating) -> Card {
-        let mut out = match self.0.card.state {
+        let mut out = match self.card.state {
             New => self.review_new(rating),
             Learning | Relearning | Reviewing => self.review_reviewing(rating),
         };
@@ -20,34 +27,34 @@ impl Longterm {
     }
 
     fn review_new(&self, rating: Rating) -> Card {
-        let p = &self.0.parameters;
+        let p = &self.parameters;
 
         let mut next = Card {
             difficulty: p.init_difficulty(rating),
             stability: p.init_stability(rating),
-            reviewed_at: self.0.now,
-            ..self.0.card
+            reviewed_at: self.now,
+            ..self.card
         };
 
         let interval =
             self.next_interval(Cards::from_fn(|rating| p.init_stability(rating)), 0, rating);
-        next.due = self.0.now + Duration::days(interval);
+        next.due = self.now + Duration::days(interval);
 
         next
     }
 
     fn review_reviewing(&self, rating: Rating) -> Card {
-        let p = &self.0.parameters;
-        let interval = self.0.card.elapsed_days(self.0.now);
-        let stability = self.0.card.stability;
-        let difficulty = self.0.card.difficulty;
-        let retrievability = self.0.card.retrievability(&self.0.parameters, self.0.now);
+        let p = &self.parameters;
+        let interval = self.card.elapsed_days(self.now);
+        let stability = self.card.stability;
+        let difficulty = self.card.difficulty;
+        let retrievability = self.card.retrievability(&self.parameters, self.now);
 
         let mut next = Card {
             difficulty: p.next_difficulty(difficulty, rating),
             stability: p.next_stability(difficulty, stability, retrievability, rating),
-            reviewed_at: self.0.now,
-            ..self.0.card
+            reviewed_at: self.now,
+            ..self.card
         };
 
         let interval = self.next_interval(
@@ -58,14 +65,14 @@ impl Longterm {
             rating,
         );
 
-        next.due = self.0.now + Duration::days(interval);
+        next.due = self.now + Duration::days(interval);
 
         next
     }
 
     fn next_interval(&self, stability: Cards<f64>, elapsed_days: i64, rating: Rating) -> i64 {
-        let mut interval = stability
-            .map(|(_, stability)| self.0.parameters.next_interval(stability, elapsed_days));
+        let mut interval =
+            stability.map(|(_, stability)| self.parameters.next_interval(stability, elapsed_days));
 
         interval.again = interval.again.min(interval.hard);
         interval.hard = interval.hard.max(interval.again + 1.0);
