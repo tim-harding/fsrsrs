@@ -1,19 +1,19 @@
-mod basic;
-mod longterm;
+mod long_term;
+mod short_term;
 
 use crate::{Card, Parameters, Rating};
-use basic::Basic;
 use chrono::{DateTime, Utc};
-use longterm::Longterm;
+use long_term::LongTerm;
+use short_term::ShortTerm;
 
 pub struct Scheduler(Inner);
 
 impl Scheduler {
     pub fn new(parameters: Parameters, card: Card, now: DateTime<Utc>) -> Scheduler {
         Self(if parameters.enable_short_term {
-            Inner::Basic(Basic::new(parameters, card, now))
+            Inner::Basic(ShortTerm::new(parameters, card, now))
         } else {
-            Inner::Longterm(Longterm::new(parameters, card, now))
+            Inner::Longterm(LongTerm::new(parameters, card, now))
         })
     }
 
@@ -26,6 +26,6 @@ impl Scheduler {
 }
 
 enum Inner {
-    Basic(Basic),
-    Longterm(Longterm),
+    Basic(ShortTerm),
+    Longterm(LongTerm),
 }

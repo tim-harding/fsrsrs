@@ -5,13 +5,13 @@ use crate::{
 };
 use chrono::{DateTime, Duration, Utc};
 
-pub struct Basic {
+pub struct ShortTerm {
     pub now: DateTime<Utc>,
     pub parameters: Parameters,
     pub card: Card,
 }
 
-impl Basic {
+impl ShortTerm {
     pub fn new(parameters: Parameters, card: Card, now: DateTime<Utc>) -> Self {
         Self {
             parameters,
@@ -122,7 +122,7 @@ mod tests {
     use crate::{
         models::{Card, Rating},
         parameters::Parameters,
-        scheduler::basic::Basic,
+        scheduler::short_term::ShortTerm,
         testing::{string_to_utc, RoundFloat, TEST_RATINGS, WEIGHTS},
         State,
     };
@@ -135,7 +135,7 @@ mod tests {
         let mut interval_history = vec![];
 
         for rating in TEST_RATINGS.into_iter() {
-            let scheduler = Basic::new(Parameters::default(), card, now);
+            let scheduler = ShortTerm::new(Parameters::default(), card, now);
             card = scheduler.next_card(rating);
             interval_history.push(card.scheduled_days());
             now = card.due;
@@ -157,7 +157,7 @@ mod tests {
 
         for rating in TEST_RATINGS.into_iter() {
             state_list.push(card.state);
-            let scheduler = Basic::new(params, card, now);
+            let scheduler = ShortTerm::new(params, card, now);
             card = scheduler.next_card(rating);
             now = card.due;
         }
@@ -188,11 +188,11 @@ mod tests {
         ];
         let intervals = [0, 0, 1, 3, 8, 21];
         for (index, rating) in ratings.into_iter().enumerate() {
-            card = Basic::new(params, card, now).next_card(rating);
+            card = ShortTerm::new(params, card, now).next_card(rating);
             now += Duration::days(intervals[index] as i64);
         }
 
-        card = Basic::new(params, card, now).next_card(Rating::Good);
+        card = ShortTerm::new(params, card, now).next_card(Rating::Good);
         assert_eq!(card.stability.round_float(4), 71.4554);
         assert_eq!(card.difficulty.round_float(4), 5.0976);
     }
@@ -207,7 +207,7 @@ mod tests {
             .into_iter()
             .enumerate()
         {
-            let card = Basic::new(Parameters::default(), card, now).next_card(rating);
+            let card = ShortTerm::new(Parameters::default(), card, now).next_card(rating);
             let retrievability = card.retrievability(&Parameters::default(), card.due);
 
             assert_eq!(retrievability.round_float(7), expect_retrievability[i]);

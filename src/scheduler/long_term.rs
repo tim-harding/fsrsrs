@@ -1,13 +1,13 @@
 use crate::{Card, Parameters, Rating, State::*};
 use chrono::{DateTime, Duration, Utc};
 
-pub struct Longterm {
+pub struct LongTerm {
     pub now: DateTime<Utc>,
     pub parameters: Parameters,
     pub card: Card,
 }
 
-impl Longterm {
+impl LongTerm {
     pub fn new(parameters: Parameters, card: Card, now: DateTime<Utc>) -> Self {
         Self {
             parameters,
@@ -65,7 +65,7 @@ mod tests {
     use crate::{
         models::Card,
         parameters::Parameters,
-        scheduler::longterm::Longterm,
+        scheduler::long_term::LongTerm,
         testing::{string_to_utc, RoundFloat, TEST_RATINGS, WEIGHTS},
     };
 
@@ -84,7 +84,7 @@ mod tests {
         let mut difficulty_history = vec![];
 
         for rating in TEST_RATINGS.into_iter() {
-            let scheduler = Longterm::new(params, card, now);
+            let scheduler = LongTerm::new(params, card, now);
             card = scheduler.next_card(rating);
 
             interval_history.push(card.scheduled_days());
