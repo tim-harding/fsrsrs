@@ -12,16 +12,6 @@ pub struct Card {
 }
 
 impl Card {
-    pub fn new() -> Self {
-        Self {
-            reviewed_at: DateTime::default(),
-            interval: Duration::zero(),
-            rating: Rating::Again,
-            stability: 0.0,
-            difficulty: 0.0,
-        }
-    }
-
     pub fn due(&self) -> DateTime<Utc> {
         self.reviewed_at + self.interval
     }
@@ -36,12 +26,6 @@ impl Card {
 
     pub fn retrievability(&self, parameters: &Parameters, now: DateTime<Utc>) -> f64 {
         parameters.forgetting_curve(self.elapsed_days(now) as f64, self.stability)
-    }
-}
-
-impl Default for Card {
-    fn default() -> Self {
-        Self::new()
     }
 }
 
