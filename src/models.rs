@@ -9,7 +9,6 @@ pub struct Card {
     pub state: State,
     pub stability: f64,
     pub difficulty: f64,
-    pub elapsed_days: i64,
     pub reps: i32,
     pub lapses: i32,
 }

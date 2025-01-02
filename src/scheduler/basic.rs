@@ -39,7 +39,8 @@ impl Basic {
             Hard => (Duration::minutes(5), Learning),
             Good => (Duration::minutes(10), Learning),
             Easy => {
-                let easy_interval = p.next_interval(card.stability, card.elapsed_days) as i64;
+                let easy_interval =
+                    p.next_interval(card.stability, card.elapsed_days(self.0.now)) as i64;
                 (Duration::days(easy_interval), Reviewing)
             }
         };
@@ -52,7 +53,7 @@ impl Basic {
     fn review_learning(&self, rating: Rating) -> Card {
         let p = &self.0.parameters;
         let last = &self.0.previous;
-        let interval = self.0.current.elapsed_days;
+        let interval = self.0.current.elapsed_days(self.0.now);
 
         let mut card = self.0.current;
         card.difficulty = p.next_difficulty(last.difficulty, rating);
@@ -82,7 +83,7 @@ impl Basic {
 
     fn review_reviewing(&self, rating: Rating) -> Card {
         let p = &self.0.parameters;
-        let interval = self.0.current.elapsed_days;
+        let interval = self.0.current.elapsed_days(self.0.now);
         let stability = self.0.previous.stability;
         let difficulty = self.0.previous.difficulty;
         let retrievability = self.0.previous.retrievability(p, self.0.now);

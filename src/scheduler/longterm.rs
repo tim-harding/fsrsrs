@@ -30,7 +30,6 @@ impl Longterm {
         let p = &self.0.parameters;
         let mut next = self.0.current;
 
-        next.elapsed_days = 0;
         next.stability = p.init_stability(rating);
         next.difficulty = p.init_difficulty(rating);
         next.state = Reviewing;
@@ -45,7 +44,7 @@ impl Longterm {
     fn review_reviewing(&self, rating: Rating) -> Card {
         let p = &self.0.parameters;
         let mut next = self.0.current;
-        let interval = self.0.current.elapsed_days;
+        let interval = self.0.current.elapsed_days(self.0.now);
         let stability = self.0.previous.stability;
         let difficulty = self.0.previous.difficulty;
         let retrievability = self
