@@ -10,7 +10,7 @@ impl Longterm {
     }
 
     pub fn next_card(&self, rating: Rating) -> Card {
-        let mut out = match self.0.previous.state {
+        let mut out = match self.0.card.state {
             New => self.review_new(rating),
             Learning | Relearning | Reviewing => self.review_reviewing(rating),
         };
@@ -21,10 +21,13 @@ impl Longterm {
 
     fn review_new(&self, rating: Rating) -> Card {
         let p = &self.0.parameters;
-        let mut next = self.0.current;
 
-        next.stability = p.init_stability(rating);
-        next.difficulty = p.init_difficulty(rating);
+        let mut next = Card {
+            difficulty: p.init_difficulty(rating),
+            stability: p.init_stability(rating),
+            reviewed_at: self.0.now,
+            ..self.0.card
+        };
 
         let interval =
             self.next_interval(Cards::from_fn(|rating| p.init_stability(rating)), 0, rating);
@@ -35,17 +38,17 @@ impl Longterm {
 
     fn review_reviewing(&self, rating: Rating) -> Card {
         let p = &self.0.parameters;
-        let mut next = self.0.current;
-        let interval = self.0.current.elapsed_days(self.0.now);
-        let stability = self.0.previous.stability;
-        let difficulty = self.0.previous.difficulty;
-        let retrievability = self
-            .0
-            .previous
-            .retrievability(&self.0.parameters, self.0.now);
+        let interval = self.0.card.elapsed_days(self.0.now);
+        let stability = self.0.card.stability;
+        let difficulty = self.0.card.difficulty;
+        let retrievability = self.0.card.retrievability(&self.0.parameters, self.0.now);
 
-        next.difficulty = p.next_difficulty(difficulty, rating);
-        next.stability = p.next_stability(difficulty, stability, retrievability, rating);
+        let mut next = Card {
+            difficulty: p.next_difficulty(difficulty, rating),
+            stability: p.next_stability(difficulty, stability, retrievability, rating),
+            reviewed_at: self.0.now,
+            ..self.0.card
+        };
 
         let interval = self.next_interval(
             Cards::from_fn(|rating| {

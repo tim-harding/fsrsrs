@@ -15,7 +15,7 @@ impl Basic {
     }
 
     pub fn next_card(&self, rating: Rating) -> Card {
-        let mut out = match self.0.previous.state {
+        let mut out = match self.0.card.state {
             New => self.review_new(rating),
             Learning | Relearning => self.review_learning(rating),
             Reviewing => self.review_reviewing(rating),
@@ -27,9 +27,12 @@ impl Basic {
     fn review_new(&self, rating: Rating) -> Card {
         let p = &self.0.parameters;
 
-        let mut card = self.0.current;
-        card.difficulty = p.init_difficulty(rating);
-        card.stability = p.init_stability(rating);
+        let mut card = Card {
+            difficulty: p.init_difficulty(rating),
+            stability: p.init_stability(rating),
+            reviewed_at: self.0.now,
+            ..self.0.card
+        };
 
         let (due, state) = match rating {
             Again => (Duration::minutes(1), Learning),
@@ -49,12 +52,15 @@ impl Basic {
 
     fn review_learning(&self, rating: Rating) -> Card {
         let p = &self.0.parameters;
-        let last = &self.0.previous;
-        let interval = self.0.current.elapsed_days(self.0.now);
+        let last = &self.0.card;
+        let interval = self.0.card.elapsed_days(self.0.now);
 
-        let mut card = self.0.current;
-        card.difficulty = p.next_difficulty(last.difficulty, rating);
-        card.stability = p.short_term_stability(last.stability, rating);
+        let mut card = Card {
+            difficulty: p.next_difficulty(last.difficulty, rating),
+            stability: p.short_term_stability(last.stability, rating),
+            reviewed_at: self.0.now,
+            ..self.0.card
+        };
 
         let (due, state) = match rating {
             Again => (Duration::minutes(5), last.state),
@@ -80,12 +86,15 @@ impl Basic {
 
     fn review_reviewing(&self, rating: Rating) -> Card {
         let p = &self.0.parameters;
-        let interval = self.0.current.elapsed_days(self.0.now);
-        let stability = self.0.previous.stability;
-        let difficulty = self.0.previous.difficulty;
-        let retrievability = self.0.previous.retrievability(p, self.0.now);
+        let interval = self.0.card.elapsed_days(self.0.now);
+        let stability = self.0.card.stability;
+        let difficulty = self.0.card.difficulty;
+        let retrievability = self.0.card.retrievability(p, self.0.now);
 
-        let mut cards = Cards::splat(self.0.current);
+        let mut cards = Cards::splat(Card {
+            reviewed_at: self.0.now,
+            ..self.0.card
+        });
         cards.update(|(rating, card)| {
             card.difficulty = p.next_difficulty(difficulty, rating);
             card.stability = p.next_stability(difficulty, stability, retrievability, rating);

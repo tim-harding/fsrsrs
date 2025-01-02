@@ -5,19 +5,14 @@ use chrono::{DateTime, Utc};
 pub struct Base {
     pub now: DateTime<Utc>,
     pub parameters: Parameters,
-    pub previous: Card,
-    pub current: Card,
+    pub card: Card,
 }
 
 impl Base {
     pub fn new(parameters: Parameters, card: Card, now: DateTime<Utc>) -> Self {
-        let mut current = card;
-        current.reviewed_at = now;
-
         Self {
             parameters,
-            previous: card,
-            current,
+            card,
             now,
         }
     }
