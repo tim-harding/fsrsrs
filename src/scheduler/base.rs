@@ -13,7 +13,6 @@ impl Base {
     pub fn new(parameters: Parameters, card: Card, now: DateTime<Utc>) -> Self {
         let mut current = card;
         current.last_review = now;
-        current.reps += 1;
 
         Self {
             parameters,

@@ -1,11 +1,5 @@
 use super::base::Base;
-use crate::{
-    cards::Cards,
-    Card, Parameters,
-    Rating::{self, *},
-    Review,
-    State::*,
-};
+use crate::{cards::Cards, Card, Parameters, Rating, Review, State::*};
 use chrono::{DateTime, Duration, Utc};
 
 pub struct Longterm(Base);
@@ -55,10 +49,6 @@ impl Longterm {
         next.difficulty = p.next_difficulty(difficulty, rating);
         next.stability = p.next_stability(difficulty, stability, retrievability, rating);
         next.state = Reviewing;
-        next.lapses += match rating {
-            Again => 1,
-            Hard | Good | Easy => 0,
-        };
 
         let interval = self.next_interval(
             Cards::from_fn(|rating| {

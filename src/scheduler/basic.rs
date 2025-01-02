@@ -96,14 +96,12 @@ impl Basic {
 
         let interval = self.review_intervals(cards.map(|(_, card)| card.stability), interval);
 
-        let (due, lapses) = match rating {
-            Again => (Duration::minutes(5), 1),
-            Hard | Good | Easy => (Duration::days(interval[rating]), 0),
-        };
-
         let mut card = cards[rating];
-        card.due = self.0.now + due;
-        card.lapses += lapses;
+        card.due = self.0.now
+            + (match rating {
+                Again => Duration::minutes(5),
+                Hard | Good | Easy => Duration::days(interval[rating]),
+            });
         card.state = next_state(rating);
         card
     }
