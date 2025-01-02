@@ -4,7 +4,7 @@ mod fsrs;
 pub use fsrs::Fsrs;
 
 mod card;
-pub use card::{Card, Rating};
+pub use card::{Card, Grade};
 
 mod parameters;
 pub use parameters::Parameters;

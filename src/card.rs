@@ -10,7 +10,7 @@ pub struct Card {
     /// Time interval from the last review for the next review
     pub interval: Duration,
     /// Difficulty rating of the review
-    pub rating: Rating,
+    pub grade: Grade,
     /// FSRS memory stability after the review
     pub stability: f64,
     /// FSRS memory difficulty after the review
@@ -42,7 +42,7 @@ impl Card {
 /// Difficulty classification of a review
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum Rating {
+pub enum Grade {
     Again = 1,
     Hard = 2,
     Good = 3,

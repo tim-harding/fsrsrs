@@ -1,4 +1,4 @@
-use crate::{ParametersBuilder, Rating};
+use crate::{Grade, ParametersBuilder};
 
 /// FSRS algorithm weights
 pub type Weights = [f64; 19];
@@ -23,15 +23,15 @@ impl Parameters {
         (1.0 + Self::FACTOR * elapsed_days / stability).powf(Self::DECAY)
     }
 
-    pub(crate) fn init_difficulty(&self, rating: Rating) -> f64 {
-        let rating_int: i32 = rating as i32;
+    pub(crate) fn init_difficulty(&self, grade: Grade) -> f64 {
+        let grade_int: i32 = grade as i32;
 
-        (self.w[4] - f64::exp(self.w[5] * (rating_int as f64 - 1.0)) + 1.0).clamp(1.0, 10.0)
+        (self.w[4] - f64::exp(self.w[5] * (grade_int as f64 - 1.0)) + 1.0).clamp(1.0, 10.0)
     }
 
-    pub(crate) fn init_stability(&self, rating: Rating) -> f64 {
-        let rating_int: i32 = rating as i32;
-        self.w[(rating_int - 1) as usize].max(0.1)
+    pub(crate) fn init_stability(&self, grade: Grade) -> f64 {
+        let grade_int: i32 = grade as i32;
+        self.w[(grade_int - 1) as usize].max(0.1)
     }
 
     pub(crate) fn next_interval(&self, stability: f64) -> f64 {
@@ -40,11 +40,11 @@ impl Parameters {
             .clamp(1.0, self.maximum_interval as f64)
     }
 
-    pub(crate) fn next_difficulty(&self, difficulty: f64, rating: Rating) -> f64 {
-        let rating_int = rating as i32;
-        let next_difficulty = self.w[6].mul_add(-(rating_int as f64 - 3.0), difficulty);
+    pub(crate) fn next_difficulty(&self, difficulty: f64, grade: Grade) -> f64 {
+        let grade_int = grade as i32;
+        let next_difficulty = self.w[6].mul_add(-(grade_int as f64 - 3.0), difficulty);
         let mean_reversion =
-            self.mean_reversion(self.init_difficulty(Rating::Easy), next_difficulty);
+            self.mean_reversion(self.init_difficulty(Grade::Easy), next_difficulty);
         mean_reversion.clamp(1.0, 10.0)
     }
 
@@ -53,12 +53,12 @@ impl Parameters {
         difficulty: f64,
         stability: f64,
         retrievability: f64,
-        rating: Rating,
+        grade: Grade,
     ) -> f64 {
-        match rating {
-            Rating::Again => self.next_forget_stability(difficulty, stability, retrievability),
-            Rating::Hard | Rating::Good | Rating::Easy => {
-                self.next_recall_stability(difficulty, stability, retrievability, rating)
+        match grade {
+            Grade::Again => self.next_forget_stability(difficulty, stability, retrievability),
+            Grade::Hard | Grade::Good | Grade::Easy => {
+                self.next_recall_stability(difficulty, stability, retrievability, grade)
             }
         }
     }
@@ -68,11 +68,11 @@ impl Parameters {
         difficulty: f64,
         stability: f64,
         retrievability: f64,
-        rating: Rating,
+        grade: Grade,
     ) -> f64 {
-        let modifier = match rating {
-            Rating::Hard => self.w[15],
-            Rating::Easy => self.w[16],
+        let modifier = match grade {
+            Grade::Hard => self.w[15],
+            Grade::Easy => self.w[16],
             _ => 1.0,
         };
 

@@ -1,6 +1,6 @@
 use std::ops::{Index, IndexMut};
 
-use crate::Rating::{self, *};
+use crate::Grade::{self, *};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Cards<T: Copy> {
@@ -24,7 +24,7 @@ impl<T: Copy> Cards<T> {
         Self::new(t, t, t, t)
     }
 
-    pub fn from_fn(f: impl Fn(Rating) -> T) -> Self {
+    pub fn from_fn(f: impl Fn(Grade) -> T) -> Self {
         Self::new(f(Again), f(Hard), f(Good), f(Easy))
     }
 
@@ -45,7 +45,7 @@ impl<T: Copy> Cards<T> {
         ]
     }
 
-    pub fn map<R: Copy>(self, f: impl Fn((Rating, T)) -> R) -> Cards<R> {
+    pub fn map<R: Copy>(self, f: impl Fn((Grade, T)) -> R) -> Cards<R> {
         Cards::new(
             f((Again, self.again)),
             f((Hard, self.hard)),
@@ -54,7 +54,7 @@ impl<T: Copy> Cards<T> {
         )
     }
 
-    pub fn update(&mut self, f: impl Fn((Rating, &mut T))) {
+    pub fn update(&mut self, f: impl Fn((Grade, &mut T))) {
         f((Again, &mut self.again));
         f((Hard, &mut self.hard));
         f((Good, &mut self.good));
@@ -68,8 +68,8 @@ impl<T: Copy> IndexMut<usize> for Cards<T> {
     }
 }
 
-impl<T: Copy> IndexMut<Rating> for Cards<T> {
-    fn index_mut(&mut self, index: Rating) -> &mut Self::Output {
+impl<T: Copy> IndexMut<Grade> for Cards<T> {
+    fn index_mut(&mut self, index: Grade) -> &mut Self::Output {
         &mut self[index as usize - 1]
     }
 }
@@ -82,10 +82,10 @@ impl<T: Copy> Index<usize> for Cards<T> {
     }
 }
 
-impl<T: Copy> Index<Rating> for Cards<T> {
+impl<T: Copy> Index<Grade> for Cards<T> {
     type Output = T;
 
-    fn index(&self, index: Rating) -> &Self::Output {
+    fn index(&self, index: Grade) -> &Self::Output {
         &self[index as usize - 1]
     }
 }

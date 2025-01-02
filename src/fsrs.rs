@@ -1,4 +1,4 @@
-use crate::{Card, Parameters, Rating};
+use crate::{Card, Grade, Parameters};
 use chrono::{DateTime, Duration, Utc};
 
 /// The FSRS algorithm
@@ -19,8 +19,8 @@ impl Fsrs {
     ///
     /// - `card`: The card being reviewed, or None if it's the first review
     /// - `now`: The time the card is reviewed
-    /// - `rating`: The difficulty of the review
-    pub fn next_card(&self, card: Option<Card>, now: DateTime<Utc>, rating: Rating) -> Card {
+    /// - `grade`: The difficulty of the review
+    pub fn next_card(&self, card: Option<Card>, now: DateTime<Utc>, grade: Grade) -> Card {
         let p = &self.parameters;
 
         let (difficulty, stability) = if let Some(card) = card {
@@ -30,17 +30,17 @@ impl Fsrs {
                 ..
             } = card;
             (
-                p.next_difficulty(difficulty, rating),
-                p.next_stability(difficulty, stability, card.retrievability(p, now), rating),
+                p.next_difficulty(difficulty, grade),
+                p.next_stability(difficulty, stability, card.retrievability(p, now), grade),
             )
         } else {
-            (p.init_difficulty(rating), p.init_stability(rating))
+            (p.init_difficulty(grade), p.init_stability(grade))
         };
 
         Card {
             difficulty,
             stability,
-            rating,
+            grade,
             reviewed_at: now,
             interval: Duration::days(p.next_interval(stability) as i64),
         }
@@ -49,24 +49,24 @@ impl Fsrs {
 
 #[cfg(test)]
 mod tests {
-    use crate::card::Rating;
+    use crate::card::Grade;
     use crate::{parameters::Parameters, Fsrs};
     use chrono::{DateTime, TimeZone, Utc};
 
-    pub const TEST_RATINGS: [Rating; 13] = [
-        Rating::Good,
-        Rating::Good,
-        Rating::Good,
-        Rating::Good,
-        Rating::Good,
-        Rating::Good,
-        Rating::Again,
-        Rating::Again,
-        Rating::Good,
-        Rating::Good,
-        Rating::Good,
-        Rating::Good,
-        Rating::Good,
+    pub const TEST_GRADES: [Grade; 13] = [
+        Grade::Good,
+        Grade::Good,
+        Grade::Good,
+        Grade::Good,
+        Grade::Good,
+        Grade::Good,
+        Grade::Again,
+        Grade::Again,
+        Grade::Good,
+        Grade::Good,
+        Grade::Good,
+        Grade::Good,
+        Grade::Good,
     ];
 
     pub const WEIGHTS: [f64; 19] = [
@@ -103,9 +103,9 @@ mod tests {
         let mut stability_history = vec![];
         let mut difficulty_history = vec![];
 
-        for rating in TEST_RATINGS.into_iter() {
+        for grade in TEST_GRADES.into_iter() {
             let scheduler = Fsrs::new(params);
-            card = Some(scheduler.next_card(card, now, rating));
+            card = Some(scheduler.next_card(card, now, grade));
             let card = card.unwrap();
             interval_history.push(card.interval.num_days());
             stability_history.push(card.stability.round_float(4));
