@@ -52,30 +52,31 @@ impl Basic {
 
     fn review_learning(&self, rating: Rating) -> Card {
         let p = &self.0.parameters;
+        let last = &self.0.last;
         let interval = self.0.current.elapsed_days;
 
         let mut card = self.0.current;
-        card.difficulty = p.next_difficulty(self.0.last.difficulty, rating);
-        card.stability = p.short_term_stability(self.0.last.stability, rating);
+        card.difficulty = p.next_difficulty(last.difficulty, rating);
+        card.stability = p.short_term_stability(last.stability, rating);
 
-        let (days, due, state) = match rating {
-            Again => (0, Duration::minutes(5), self.0.last.state),
-            Hard => (0, Duration::minutes(10), self.0.last.state),
+        let (due, state) = match rating {
+            Again => (Duration::minutes(5), last.state),
+            Hard => (Duration::minutes(10), last.state),
             Good => {
                 let good_interval = p.next_interval(card.stability, interval) as i64;
-                (good_interval, Duration::days(good_interval), Reviewing)
+                (Duration::days(good_interval), Reviewing)
             }
             Easy => {
-                let good_stability = p.short_term_stability(self.0.last.stability, Good);
+                let good_stability = p.short_term_stability(last.stability, Good);
                 let good_interval = p.next_interval(good_stability, interval);
                 let easy_interval = p
                     .next_interval(card.stability, interval)
                     .max(good_interval + 1.0) as i64;
-                (easy_interval, Duration::days(easy_interval), Reviewing)
+                (Duration::days(easy_interval), Reviewing)
             }
         };
 
-        card.scheduled_days = days;
+        card.scheduled_days = due.num_days();
         card.due = self.0.now + due;
         card.state = state;
         card
@@ -96,13 +97,13 @@ impl Basic {
 
         let interval = self.review_intervals(cards.map(|(_, card)| card.stability), interval);
 
-        let (days, due, lapses) = match rating {
-            Again => (0, Duration::minutes(5), 1),
-            Hard | Good | Easy => (interval[rating], Duration::days(interval[rating]), 0),
+        let (due, lapses) = match rating {
+            Again => (Duration::minutes(5), 1),
+            Hard | Good | Easy => (Duration::days(interval[rating]), 0),
         };
 
         let mut card = cards[rating];
-        card.scheduled_days = days;
+        card.scheduled_days = due.num_days();
         card.due = self.0.now + due;
         card.lapses += lapses;
         card.state = next_state(rating);
