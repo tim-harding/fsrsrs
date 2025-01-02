@@ -17,44 +17,35 @@ impl Scheduler {
     }
 
     pub fn next_card(&self, rating: Rating) -> Card {
-        let mut out = match self.card.state {
-            New => self.review_new(rating),
-            Learning | Relearning | Reviewing => self.review_reviewing(rating),
-        };
-        out.state = Reviewing;
-        out.rating = rating;
-        out
-    }
-
-    fn review_new(&self, rating: Rating) -> Card {
         let p = &self.parameters;
+        let Card {
+            stability,
+            difficulty,
+            state,
+            ..
+        } = self.card;
 
-        let mut next = Card {
-            difficulty: p.init_difficulty(rating),
-            stability: p.init_stability(rating),
-            reviewed_at: self.now,
-            ..self.card
+        let (difficulty, stability) = match state {
+            New => (p.init_difficulty(rating), p.init_stability(rating)),
+            Learning | Relearning | Reviewing => (
+                p.next_difficulty(difficulty, rating),
+                p.next_stability(
+                    difficulty,
+                    stability,
+                    self.card.retrievability(p, self.now),
+                    rating,
+                ),
+            ),
         };
 
-        next.interval = Duration::days(self.parameters.next_interval(next.stability) as i64);
-        next
-    }
-
-    fn review_reviewing(&self, rating: Rating) -> Card {
-        let p = &self.parameters;
-        let stability = self.card.stability;
-        let difficulty = self.card.difficulty;
-        let retrievability = self.card.retrievability(&self.parameters, self.now);
-
-        let mut next = Card {
-            difficulty: p.next_difficulty(difficulty, rating),
-            stability: p.next_stability(difficulty, stability, retrievability, rating),
+        Card {
+            difficulty,
+            stability,
+            rating,
             reviewed_at: self.now,
-            ..self.card
-        };
-
-        next.interval = Duration::days(self.parameters.next_interval(next.stability) as i64);
-        next
+            interval: Duration::days(p.next_interval(stability) as i64),
+            state: Reviewing,
+        }
     }
 }
 
