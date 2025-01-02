@@ -1,16 +1,25 @@
 use crate::{Card, Parameters, Rating};
 use chrono::{DateTime, Duration, Utc};
 
+/// The FSRS algorithm
 #[derive(Debug, Default, Clone)]
 pub struct Fsrs {
     parameters: Parameters,
 }
 
 impl Fsrs {
+    /// Create a new [Fsrs] with the given parameters
     pub const fn new(parameters: Parameters) -> Self {
         Self { parameters }
     }
 
+    /// Compute the new state after a review
+    ///
+    /// # Parameters
+    ///
+    /// - `card`: The card being reviewed, or None if it's the first review
+    /// - `now`: The time the card is reviewed
+    /// - `rating`: The difficulty of the review
     pub fn next_card(&self, card: Option<Card>, now: DateTime<Utc>, rating: Rating) -> Card {
         let p = &self.parameters;
 
