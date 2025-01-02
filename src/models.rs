@@ -5,7 +5,7 @@ use chrono::{DateTime, Duration, Utc};
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Card {
     pub reviewed_at: DateTime<Utc>,
-    pub due: DateTime<Utc>,
+    pub interval: Duration,
     pub rating: Rating,
     pub state: State,
     pub stability: f64,
@@ -14,15 +14,18 @@ pub struct Card {
 
 impl Card {
     pub fn new() -> Self {
-        let now = Utc::now();
         Self {
-            reviewed_at: now,
-            due: now,
+            reviewed_at: Utc::now(),
+            interval: Duration::zero(),
             rating: Rating::Again,
             state: State::New,
             stability: 0.0,
             difficulty: 0.0,
         }
+    }
+
+    pub fn due(&self) -> DateTime<Utc> {
+        self.reviewed_at + self.interval
     }
 
     pub fn elapsed(&self, now: DateTime<Utc>) -> Duration {
@@ -34,14 +37,6 @@ impl Card {
 
     pub fn elapsed_days(&self, now: DateTime<Utc>) -> i64 {
         self.elapsed(now).num_days()
-    }
-
-    pub fn scheduled(&self) -> Duration {
-        self.due - self.reviewed_at
-    }
-
-    pub fn scheduled_days(&self) -> i64 {
-        self.scheduled().num_days()
     }
 
     pub fn retrievability(&self, parameters: &Parameters, now: DateTime<Utc>) -> f64 {

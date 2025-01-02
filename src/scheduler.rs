@@ -36,8 +36,7 @@ impl Scheduler {
             ..self.card
         };
 
-        let interval = self.parameters.next_interval(next.stability);
-        next.due = self.now + Duration::days(interval as i64);
+        next.interval = Duration::days(self.parameters.next_interval(next.stability) as i64);
         next
     }
 
@@ -54,8 +53,7 @@ impl Scheduler {
             ..self.card
         };
 
-        let interval = self.parameters.next_interval(next.stability);
-        next.due = self.now + Duration::days(interval as i64);
+        next.interval = Duration::days(self.parameters.next_interval(next.stability) as i64);
         next
     }
 }
@@ -86,10 +84,10 @@ mod tests {
             let scheduler = Scheduler::new(params, card, now);
             card = scheduler.next_card(rating);
 
-            interval_history.push(card.scheduled_days());
+            interval_history.push(card.interval.num_days());
             stability_history.push(card.stability.round_float(4));
             difficulty_history.push(card.difficulty.round_float(4));
-            now = card.due;
+            now += card.interval;
         }
 
         let expected_interval = [3, 13, 48, 155, 445, 1158, 17, 3, 9, 27, 74, 190, 457];
