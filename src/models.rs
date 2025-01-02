@@ -15,7 +15,7 @@ pub struct Card {
 impl Card {
     pub fn new() -> Self {
         Self {
-            reviewed_at: Utc::now(),
+            reviewed_at: DateTime::default(),
             interval: Duration::zero(),
             rating: Rating::Again,
             state: State::New,
