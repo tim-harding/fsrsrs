@@ -15,11 +15,13 @@ impl Basic {
     }
 
     pub fn next_card(&self, rating: Rating) -> Card {
-        match self.0.previous.state {
+        let mut out = match self.0.previous.state {
             New => self.review_new(rating),
             Learning | Relearning => self.review_learning(rating),
             Reviewing => self.review_reviewing(rating),
-        }
+        };
+        out.rating = rating;
+        out
     }
 
     fn review_new(&self, rating: Rating) -> Card {

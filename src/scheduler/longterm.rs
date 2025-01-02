@@ -10,10 +10,13 @@ impl Longterm {
     }
 
     pub fn next_card(&self, rating: Rating) -> Card {
-        match self.0.previous.state {
+        let mut out = match self.0.previous.state {
             New => self.review_new(rating),
             Learning | Relearning | Reviewing => self.review_reviewing(rating),
-        }
+        };
+        out.state = Reviewing;
+        out.rating = rating;
+        out
     }
 
     fn review_new(&self, rating: Rating) -> Card {
@@ -22,7 +25,6 @@ impl Longterm {
 
         next.stability = p.init_stability(rating);
         next.difficulty = p.init_difficulty(rating);
-        next.state = Reviewing;
 
         let interval =
             self.next_interval(Cards::from_fn(|rating| p.init_stability(rating)), 0, rating);
@@ -44,7 +46,6 @@ impl Longterm {
 
         next.difficulty = p.next_difficulty(difficulty, rating);
         next.stability = p.next_stability(difficulty, stability, retrievability, rating);
-        next.state = Reviewing;
 
         let interval = self.next_interval(
             Cards::from_fn(|rating| {
