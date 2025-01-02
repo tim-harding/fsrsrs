@@ -1,11 +1,7 @@
 mod cards;
-mod testing;
 
 mod fsrs;
 pub use fsrs::Fsrs;
-
-mod scheduler;
-pub use scheduler::Scheduler;
 
 mod models;
 pub use models::{Card, Rating, State};
