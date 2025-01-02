@@ -16,7 +16,7 @@ impl Basic {
     }
 
     pub fn next_card(&self, rating: Rating) -> Card {
-        match self.0.last.state {
+        match self.0.previous.state {
             New => self.review_new(rating),
             Learning | Relearning => self.review_learning(rating),
             Reviewing => self.review_reviewing(rating),
@@ -52,7 +52,7 @@ impl Basic {
 
     fn review_learning(&self, rating: Rating) -> Card {
         let p = &self.0.parameters;
-        let last = &self.0.last;
+        let last = &self.0.previous;
         let interval = self.0.current.elapsed_days;
 
         let mut card = self.0.current;
@@ -85,9 +85,9 @@ impl Basic {
     fn review_reviewing(&self, rating: Rating) -> Card {
         let p = &self.0.parameters;
         let interval = self.0.current.elapsed_days;
-        let stability = self.0.last.stability;
-        let difficulty = self.0.last.difficulty;
-        let retrievability = self.0.last.retrievability(p, self.0.now);
+        let stability = self.0.previous.stability;
+        let difficulty = self.0.previous.difficulty;
+        let retrievability = self.0.previous.retrievability(p, self.0.now);
 
         let mut cards = Cards::splat(self.0.current);
         cards.update(|(rating, card)| {

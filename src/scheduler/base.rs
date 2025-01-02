@@ -1,38 +1,51 @@
-use crate::{models::State::*, Card, Parameters, Rating, Review};
+use crate::{Card, Parameters, Rating, Review, State::*};
 use chrono::{DateTime, Utc};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct Base {
     pub now: DateTime<Utc>,
     pub parameters: Parameters,
-    pub last: Card,
+    pub previous: Card,
     pub current: Card,
 }
 
 impl Base {
     pub fn new(parameters: Parameters, card: Card, now: DateTime<Utc>) -> Self {
-        let mut current_card: Card = card;
-        current_card.elapsed_days = match card.state {
+        let mut current = card;
+        current.elapsed_days = match card.state {
             New => 0,
             _ => (now - card.last_review).num_days(),
         };
-        current_card.last_review = now;
-        current_card.reps += 1;
+        current.last_review = now;
+        current.reps += 1;
+
         Self {
             parameters,
-            last: card,
-            current: current_card,
+            previous: card,
+            current,
             now,
         }
     }
 
-    pub const fn current_review(&self, rating: Rating) -> Review {
+    pub const fn current_review(self, rating: Rating) -> Review {
+        let Self {
+            now: reviewed_date,
+            current:
+                Card {
+                    state,
+                    elapsed_days,
+                    scheduled_days,
+                    ..
+                },
+            ..
+        } = self;
+
         Review {
             rating,
-            state: self.current.state,
-            elapsed_days: self.current.elapsed_days,
-            scheduled_days: self.current.scheduled_days,
-            reviewed_date: self.now,
+            state,
+            elapsed_days,
+            scheduled_days,
+            reviewed_date,
         }
     }
 }

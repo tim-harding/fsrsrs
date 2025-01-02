@@ -16,7 +16,7 @@ impl Longterm {
     }
 
     pub fn next_card(&self, rating: Rating) -> Card {
-        match self.0.last.state {
+        match self.0.previous.state {
             New => self.review_new(rating),
             Learning | Relearning | Reviewing => self.review_reviewing(rating),
         }
@@ -48,9 +48,12 @@ impl Longterm {
         let p = &self.0.parameters;
         let mut next = self.0.current;
         let interval = self.0.current.elapsed_days;
-        let stability = self.0.last.stability;
-        let difficulty = self.0.last.difficulty;
-        let retrievability = self.0.last.retrievability(&self.0.parameters, self.0.now);
+        let stability = self.0.previous.stability;
+        let difficulty = self.0.previous.difficulty;
+        let retrievability = self
+            .0
+            .previous
+            .retrievability(&self.0.parameters, self.0.now);
 
         next.difficulty = p.next_difficulty(difficulty, rating);
         next.stability = p.next_stability(difficulty, stability, retrievability, rating);
