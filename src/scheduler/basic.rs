@@ -88,16 +88,16 @@ impl Basic {
         let difficulty = self.0.last.difficulty;
         let retrievability = self.0.last.retrievability(p, self.0.now);
 
-        let mut cards = Cards::new(self.0.current);
+        let mut cards = Cards::splat(self.0.current);
         cards.update(|(rating, card)| {
             card.difficulty = p.next_difficulty(difficulty, rating);
             card.stability = p.next_stability(difficulty, stability, retrievability, rating);
         });
 
         let [hard_interval, good_interval, easy_interval] = self.review_intervals(
-            cards.hard.stability,
-            cards.good.stability,
-            cards.easy.stability,
+            cards[Hard].stability,
+            cards[Good].stability,
+            cards[Easy].stability,
             interval,
         );
 
@@ -108,7 +108,7 @@ impl Basic {
             Easy => (easy_interval, Duration::days(easy_interval), 0),
         };
 
-        let mut card = cards.get(rating);
+        let mut card = cards[rating];
         card.scheduled_days = days;
         card.due = self.0.now + due;
         card.lapses += lapses;

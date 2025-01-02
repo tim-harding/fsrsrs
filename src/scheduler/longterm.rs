@@ -78,12 +78,12 @@ impl Longterm {
         let mut interval = stability
             .map(|(_, stability)| self.0.parameters.next_interval(stability, elapsed_days));
 
-        interval.again = interval.again.min(interval.hard);
-        interval.hard = interval.hard.max(interval.again + 1.0);
-        interval.good = interval.good.max(interval.hard + 1.0);
-        interval.easy = interval.easy.max(interval.good + 1.0);
+        interval[Again] = interval[Again].min(interval[Hard]);
+        interval[Hard] = interval[Hard].max(interval[Again] + 1.0);
+        interval[Good] = interval[Good].max(interval[Hard] + 1.0);
+        interval[Easy] = interval[Easy].max(interval[Good] + 1.0);
 
-        interval.get(rating) as i64
+        interval[rating] as i64
     }
 }
 
