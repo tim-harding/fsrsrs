@@ -1,17 +1,16 @@
 use crate::{fuzz_range::FuzzRange, prng::Prng, ParametersBuilder, Rating};
 
-pub type Weights = [f64; 19];
+pub(crate) type Weights = [f64; 19];
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, PartialOrd)]
 pub struct Parameters {
+    pub(crate) w: Weights,
     pub(crate) request_retention: f64,
     pub(crate) maximum_interval: i32,
-    pub(crate) w: Weights,
     pub(crate) decay: f64,
     pub(crate) factor: f64,
     pub(crate) enable_short_term: bool,
     pub(crate) enable_fuzz: bool,
-    pub(crate) seed: String,
 }
 
 impl Parameters {
@@ -22,34 +21,30 @@ impl Parameters {
         1.9813, 0.0953, 0.2975, 2.2042, 0.2407, 2.9466, 0.5034, 0.6567,
     ];
 
-    pub fn new() -> Self {
-        Self::default()
-    }
-
-    pub fn forgetting_curve(&self, elapsed_days: f64, stability: f64) -> f64 {
+    pub(crate) fn forgetting_curve(&self, elapsed_days: f64, stability: f64) -> f64 {
         (1.0 + self.factor * elapsed_days / stability).powf(self.decay)
     }
 
-    pub fn init_difficulty(&self, rating: Rating) -> f64 {
+    pub(crate) fn init_difficulty(&self, rating: Rating) -> f64 {
         let rating_int: i32 = rating as i32;
 
         (self.w[4] - f64::exp(self.w[5] * (rating_int as f64 - 1.0)) + 1.0).clamp(1.0, 10.0)
     }
 
-    pub fn init_stability(&self, rating: Rating) -> f64 {
+    pub(crate) fn init_stability(&self, rating: Rating) -> f64 {
         let rating_int: i32 = rating as i32;
         self.w[(rating_int - 1) as usize].max(0.1)
     }
 
-    pub fn next_interval(&self, stability: f64, elapsed_days: i64) -> f64 {
+    pub(crate) fn next_interval(&self, stability: f64, elapsed_days: i64, seed: &str) -> f64 {
         let new_interval = (stability / Self::FACTOR
             * (self.request_retention.powf(1.0 / Self::DECAY) - 1.0))
             .round()
             .clamp(1.0, self.maximum_interval as f64);
-        self.apply_fuzz(new_interval, elapsed_days)
+        self.apply_fuzz(new_interval, elapsed_days, seed)
     }
 
-    pub fn next_difficulty(&self, difficulty: f64, rating: Rating) -> f64 {
+    pub(crate) fn next_difficulty(&self, difficulty: f64, rating: Rating) -> f64 {
         let rating_int = rating as i32;
         let next_difficulty = self.w[6].mul_add(-(rating_int as f64 - 3.0), difficulty);
         let mean_reversion =
@@ -57,12 +52,12 @@ impl Parameters {
         mean_reversion.clamp(1.0, 10.0)
     }
 
-    pub fn short_term_stability(&self, stability: f64, rating: Rating) -> f64 {
+    pub(crate) fn short_term_stability(&self, stability: f64, rating: Rating) -> f64 {
         let rating_int = rating as i32;
         stability * f64::exp(self.w[17] * (rating_int as f64 - 3.0 + self.w[18]))
     }
 
-    pub fn next_stability(
+    pub(crate) fn next_stability(
         &self,
         difficulty: f64,
         stability: f64,
@@ -98,7 +93,7 @@ impl Parameters {
             .mul_add(modifier, 1.0))
     }
 
-    pub fn next_forget_stability(
+    pub(crate) fn next_forget_stability(
         &self,
         difficulty: f64,
         stability: f64,
@@ -114,12 +109,12 @@ impl Parameters {
         self.w[7].mul_add(initial, (1.0 - self.w[7]) * current)
     }
 
-    fn apply_fuzz(&self, interval: f64, elapsed_days: i64) -> f64 {
+    fn apply_fuzz(&self, interval: f64, elapsed_days: i64, seed: &str) -> f64 {
         if !self.enable_fuzz || interval < 2.5 {
             return interval;
         }
 
-        let mut generator = Prng::new(self.seed.as_str());
+        let mut generator = Prng::new(seed);
         let fuzz_factor = generator.double();
         let (min_interval, max_interval) =
             FuzzRange::get_fuzz_range(interval, elapsed_days, self.maximum_interval);

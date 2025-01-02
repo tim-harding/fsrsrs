@@ -1,7 +1,6 @@
 use crate::{parameters::Weights, Parameters};
-use std::time::Instant;
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, Default)]
+#[derive(Debug, Copy, Clone, PartialEq, PartialOrd, Default)]
 pub struct ParametersBuilder {
     request_retention: Option<f64>,
     maximum_interval: Option<i32>,
@@ -10,7 +9,6 @@ pub struct ParametersBuilder {
     factor: Option<f64>,
     enable_short_term: Option<bool>,
     enable_fuzz: Option<bool>,
-    seed: Option<String>,
 }
 
 impl ParametersBuilder {
@@ -27,7 +25,6 @@ impl ParametersBuilder {
             factor: self.factor.unwrap_or(Parameters::FACTOR),
             enable_short_term: self.enable_short_term.unwrap_or(true),
             enable_fuzz: self.enable_fuzz.unwrap_or(false),
-            seed: self.seed.unwrap_or(format!("{:?}", Instant::now())),
         }
     }
 
@@ -63,11 +60,6 @@ impl ParametersBuilder {
 
     pub fn enable_fuzz(mut self, enable_fuzz: Option<bool>) -> Self {
         self.enable_fuzz = enable_fuzz;
-        self
-    }
-
-    pub fn seed(mut self, seed: Option<String>) -> Self {
-        self.seed = seed;
         self
     }
 }

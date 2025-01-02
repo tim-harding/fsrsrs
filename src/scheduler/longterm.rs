@@ -76,7 +76,7 @@ impl Longterm {
 
     fn next_interval(&self, stability: Cards<f64>, elapsed_days: i64, rating: Rating) -> i64 {
         let mut interval = stability
-            .map(|(_, stability)| self.0.parameters.next_interval(stability, elapsed_days));
+            .map(|(_, stability)| self.0.parameters.next_interval(stability, elapsed_days, ""));
 
         interval.again = interval.again.min(interval.hard);
         interval.hard = interval.hard.max(interval.again + 1.0);
@@ -112,12 +112,12 @@ mod tests {
 
         for rating in TEST_RATINGS.into_iter() {
             let next = {
-                let scheduler = Longterm::new(params.clone(), card, now);
+                let scheduler = Longterm::new(params, card, now);
                 scheduler.next_card(rating)
             };
 
             card = {
-                let scheduler = Longterm::new(params.clone(), card, now);
+                let scheduler = Longterm::new(params, card, now);
                 scheduler.next_card(rating)
             };
 

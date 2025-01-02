@@ -39,7 +39,7 @@ impl Basic {
             Hard => (0, Duration::minutes(5), Learning),
             Good => (0, Duration::minutes(10), Learning),
             Easy => {
-                let easy_interval = p.next_interval(card.stability, card.elapsed_days) as i64;
+                let easy_interval = p.next_interval(card.stability, card.elapsed_days, "") as i64;
                 (easy_interval, Duration::days(easy_interval), Reviewing)
             }
         };
@@ -63,14 +63,14 @@ impl Basic {
             Again => (Duration::minutes(5), last.state),
             Hard => (Duration::minutes(10), last.state),
             Good => {
-                let good_interval = p.next_interval(card.stability, interval) as i64;
+                let good_interval = p.next_interval(card.stability, interval, "") as i64;
                 (Duration::days(good_interval), Reviewing)
             }
             Easy => {
                 let good_stability = p.short_term_stability(last.stability, Good);
-                let good_interval = p.next_interval(good_stability, interval);
+                let good_interval = p.next_interval(good_stability, interval, "");
                 let easy_interval = p
-                    .next_interval(card.stability, interval)
+                    .next_interval(card.stability, interval, "")
                     .max(good_interval + 1.0) as i64;
                 (Duration::days(easy_interval), Reviewing)
             }
@@ -114,12 +114,12 @@ impl Basic {
         let p = &self.0.parameters;
         let mut interval = Cards::splat(0.0f64);
 
-        interval.hard = p.next_interval(stability.hard, interval_previous);
-        interval.good = p.next_interval(stability.good, interval_previous);
+        interval.hard = p.next_interval(stability.hard, interval_previous, "");
+        interval.good = p.next_interval(stability.good, interval_previous, "");
         interval.hard = interval.hard.min(interval.good);
         interval.good = interval.good.max(interval.hard + 1.0);
         interval.easy = p
-            .next_interval(stability.easy, interval_previous)
+            .next_interval(stability.easy, interval_previous, "")
             .max(interval.good + 1.0);
 
         interval.map(|(_, i)| i as i64)
@@ -172,7 +172,7 @@ mod tests {
         let mut state_list = vec![];
 
         for rating in TEST_RATINGS.into_iter() {
-            let scheduler = Basic::new(params.clone(), card, now);
+            let scheduler = Basic::new(params, card, now);
             card = scheduler.next_card(rating);
             let rev_log = scheduler.current_review(rating);
             state_list.push(rev_log.state);
@@ -205,11 +205,11 @@ mod tests {
         ];
         let intervals = [0, 0, 1, 3, 8, 21];
         for (index, rating) in ratings.into_iter().enumerate() {
-            card = Basic::new(params.clone(), card, now).next_card(rating);
+            card = Basic::new(params, card, now).next_card(rating);
             now += Duration::days(intervals[index] as i64);
         }
 
-        card = Basic::new(params.clone(), card, now).next_card(Rating::Good);
+        card = Basic::new(params, card, now).next_card(Rating::Good);
         assert_eq!(card.stability.round_float(4), 71.4554);
         assert_eq!(card.difficulty.round_float(4), 5.0976);
     }
@@ -225,7 +225,7 @@ mod tests {
             .enumerate()
         {
             let card = Basic::new(Parameters::default(), card, now).next_card(rating);
-            let retrievability = card.retrievability(&Parameters::new(), card.due);
+            let retrievability = card.retrievability(&Parameters::default(), card.due);
 
             assert_eq!(retrievability.round_float(7), expect_retrievability[i]);
         }

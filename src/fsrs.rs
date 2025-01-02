@@ -12,7 +12,6 @@ impl Fsrs {
     }
 
     pub fn scheduler(&self, card: Card, now: DateTime<Utc>) -> Scheduler {
-        // TODO: Avoid cloning this each time
-        Scheduler::new(self.parameters.clone(), card, now)
+        Scheduler::new(self.parameters, card, now)
     }
 }
