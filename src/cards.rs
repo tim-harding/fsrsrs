@@ -2,6 +2,7 @@ use std::ops::{Index, IndexMut};
 
 use crate::Rating::{self, *};
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Cards<T: Copy>([T; 4]);
 
 impl<T: Copy> Cards<T> {
@@ -45,8 +46,8 @@ impl<T: Copy> Cards<T> {
         self[Easy]
     }
 
-    pub fn map(self, f: impl Fn((Rating, T)) -> T) -> Self {
-        Self::new(
+    pub fn map<R: Copy>(self, f: impl Fn((Rating, T)) -> R) -> Cards<R> {
+        Cards::new(
             f((Again, self.0[0])),
             f((Hard, self.0[1])),
             f((Good, self.0[2])),

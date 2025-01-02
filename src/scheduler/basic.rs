@@ -94,18 +94,13 @@ impl Basic {
             card.stability = p.next_stability(difficulty, stability, retrievability, rating);
         });
 
-        let [hard_interval, good_interval, easy_interval] = self.review_intervals(
-            cards[Hard].stability,
-            cards[Good].stability,
-            cards[Easy].stability,
-            interval,
-        );
+        let interval = self.review_intervals(cards.map(|(_, card)| card.stability), interval);
 
         let (days, due, lapses) = match rating {
             Again => (0, Duration::minutes(5), 1),
-            Hard => (hard_interval, Duration::days(hard_interval), 0),
-            Good => (good_interval, Duration::days(good_interval), 0),
-            Easy => (easy_interval, Duration::days(easy_interval), 0),
+            Hard => (interval.hard(), Duration::days(interval.hard()), 0),
+            Good => (interval.good(), Duration::days(interval.good()), 0),
+            Easy => (interval.easy(), Duration::days(interval.easy()), 0),
         };
 
         let mut card = cards[rating];
@@ -116,26 +111,19 @@ impl Basic {
         card
     }
 
-    fn review_intervals(
-        &self,
-        hard_stability: f64,
-        good_stability: f64,
-        easy_stability: f64,
-        interval: i64,
-    ) -> [i64; 3] {
+    fn review_intervals(&self, stability: Cards<f64>, interval_previous: i64) -> Cards<i64> {
         let p = &self.0.parameters;
-        let hard_interval = p.next_interval(hard_stability, interval);
-        let good_interval = p.next_interval(good_stability, interval);
-        let hard_interval = hard_interval.min(good_interval);
-        let good_interval = good_interval.max(hard_interval + 1.0);
-        let easy_interval = p
-            .next_interval(easy_stability, interval)
-            .max(good_interval + 1.0);
-        [
-            hard_interval as i64,
-            good_interval as i64,
-            easy_interval as i64,
-        ]
+
+        let mut interval = Cards::splat(0.0f64);
+
+        interval[Hard] = p.next_interval(stability.hard(), interval_previous);
+        interval[Good] = p.next_interval(stability.good(), interval_previous);
+        interval[Hard] = interval.hard().min(interval.good());
+        interval[Good] = interval.good().max(interval.hard() + 1.0);
+        interval[Easy] = p
+            .next_interval(stability.easy(), interval_previous)
+            .max(interval.good() + 1.0);
+        interval.map(|(_, i)| i as i64)
     }
 }
 
