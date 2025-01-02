@@ -17,6 +17,15 @@ impl<T: Copy> Cards<T> {
         }
     }
 
+    pub fn from_fn(f: impl Fn(Rating) -> T) -> Self {
+        Self {
+            again: f(Again),
+            hard: f(Hard),
+            good: f(Good),
+            easy: f(Easy),
+        }
+    }
+
     pub fn get(self, rating: Rating) -> T {
         match rating {
             Again => self.again,

@@ -1,5 +1,6 @@
 use super::base::Base;
 use crate::{
+    cards::Cards,
     Card, Parameters,
     Rating::{self, *},
     Review,
@@ -35,14 +36,8 @@ impl Longterm {
         next.difficulty = p.init_difficulty(rating);
         next.state = Reviewing;
 
-        let interval = self.next_interval(
-            p.init_stability(Again),
-            p.init_stability(Hard),
-            p.init_stability(Good),
-            p.init_stability(Easy),
-            0,
-            rating,
-        );
+        let interval =
+            self.next_interval(Cards::from_fn(|rating| p.init_stability(rating)), 0, rating);
         next.scheduled_days = interval;
         next.due = self.0.now + Duration::days(interval);
 
@@ -66,10 +61,9 @@ impl Longterm {
         }
 
         let interval = self.next_interval(
-            p.next_stability(difficulty, stability, retrievability, Again),
-            p.next_stability(difficulty, stability, retrievability, Hard),
-            p.next_stability(difficulty, stability, retrievability, Good),
-            p.next_stability(difficulty, stability, retrievability, Easy),
+            Cards::from_fn(|rating| {
+                p.next_stability(difficulty, stability, retrievability, rating)
+            }),
             interval,
             rating,
         );
@@ -80,33 +74,16 @@ impl Longterm {
         next
     }
 
-    fn next_interval(
-        &self,
-        stability_again: f64,
-        stability_hard: f64,
-        stability_good: f64,
-        stability_easy: f64,
-        elapsed_days: i64,
-        rating: Rating,
-    ) -> i64 {
-        let p = &self.0.parameters;
+    fn next_interval(&self, stability: Cards<f64>, elapsed_days: i64, rating: Rating) -> i64 {
+        let mut interval = stability
+            .map(|(_, stability)| self.0.parameters.next_interval(stability, elapsed_days));
 
-        let mut again_interval = p.next_interval(stability_again, elapsed_days);
-        let mut hard_interval = p.next_interval(stability_hard, elapsed_days);
-        let mut good_interval = p.next_interval(stability_good, elapsed_days);
-        let mut easy_interval = p.next_interval(stability_easy, elapsed_days);
+        interval.again = interval.again.min(interval.hard);
+        interval.hard = interval.hard.max(interval.again + 1.0);
+        interval.good = interval.good.max(interval.hard + 1.0);
+        interval.easy = interval.easy.max(interval.good + 1.0);
 
-        again_interval = again_interval.min(hard_interval);
-        hard_interval = hard_interval.max(again_interval + 1.0);
-        good_interval = good_interval.max(hard_interval + 1.0);
-        easy_interval = easy_interval.max(good_interval + 1.0);
-
-        (match rating {
-            Again => again_interval,
-            Hard => hard_interval,
-            Good => good_interval,
-            Easy => easy_interval,
-        }) as i64
+        interval.get(rating) as i64
     }
 }
 
