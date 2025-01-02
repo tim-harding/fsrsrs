@@ -1,6 +1,4 @@
 mod cards;
-mod fuzz_range;
-mod prng;
 mod testing;
 
 mod fsrs;

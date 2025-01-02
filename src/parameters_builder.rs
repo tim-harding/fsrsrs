@@ -8,7 +8,6 @@ pub struct ParametersBuilder {
     decay: Option<f64>,
     factor: Option<f64>,
     enable_short_term: Option<bool>,
-    enable_fuzz: Option<bool>,
 }
 
 impl ParametersBuilder {
@@ -24,7 +23,6 @@ impl ParametersBuilder {
             decay: self.decay.unwrap_or(Parameters::DECAY),
             factor: self.factor.unwrap_or(Parameters::FACTOR),
             enable_short_term: self.enable_short_term.unwrap_or(true),
-            enable_fuzz: self.enable_fuzz.unwrap_or(false),
         }
     }
 
@@ -55,11 +53,6 @@ impl ParametersBuilder {
 
     pub fn enable_short_term(mut self, enable_short_term: Option<bool>) -> Self {
         self.enable_short_term = enable_short_term;
-        self
-    }
-
-    pub fn enable_fuzz(mut self, enable_fuzz: Option<bool>) -> Self {
-        self.enable_fuzz = enable_fuzz;
         self
     }
 }

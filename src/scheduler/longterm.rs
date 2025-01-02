@@ -37,7 +37,7 @@ impl Longterm {
         };
 
         let interval =
-            self.next_interval(Cards::from_fn(|rating| p.init_stability(rating)), 0, rating);
+            self.next_interval(Cards::from_fn(|rating| p.init_stability(rating)), rating);
         next.due = self.now + Duration::days(interval);
 
         next
@@ -45,7 +45,6 @@ impl Longterm {
 
     fn review_reviewing(&self, rating: Rating) -> Card {
         let p = &self.parameters;
-        let interval = self.card.elapsed_days(self.now);
         let stability = self.card.stability;
         let difficulty = self.card.difficulty;
         let retrievability = self.card.retrievability(&self.parameters, self.now);
@@ -61,7 +60,6 @@ impl Longterm {
             Cards::from_fn(|rating| {
                 p.next_stability(difficulty, stability, retrievability, rating)
             }),
-            interval,
             rating,
         );
 
@@ -70,9 +68,8 @@ impl Longterm {
         next
     }
 
-    fn next_interval(&self, stability: Cards<f64>, elapsed_days: i64, rating: Rating) -> i64 {
-        let mut interval =
-            stability.map(|(_, stability)| self.parameters.next_interval(stability, elapsed_days));
+    fn next_interval(&self, stability: Cards<f64>, rating: Rating) -> i64 {
+        let mut interval = stability.map(|(_, stability)| self.parameters.next_interval(stability));
 
         interval.again = interval.again.min(interval.hard);
         interval.hard = interval.hard.max(interval.again + 1.0);

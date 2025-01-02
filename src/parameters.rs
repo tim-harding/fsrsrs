@@ -1,4 +1,4 @@
-use crate::{fuzz_range::FuzzRange, prng::Prng, ParametersBuilder, Rating};
+use crate::{ParametersBuilder, Rating};
 
 pub(crate) type Weights = [f64; 19];
 
@@ -10,7 +10,6 @@ pub struct Parameters {
     pub(crate) decay: f64,
     pub(crate) factor: f64,
     pub(crate) enable_short_term: bool,
-    pub(crate) enable_fuzz: bool,
 }
 
 impl Parameters {
@@ -36,12 +35,10 @@ impl Parameters {
         self.w[(rating_int - 1) as usize].max(0.1)
     }
 
-    pub(crate) fn next_interval(&self, stability: f64, elapsed_days: i64) -> f64 {
-        let new_interval = (stability / Self::FACTOR
-            * (self.request_retention.powf(1.0 / Self::DECAY) - 1.0))
+    pub(crate) fn next_interval(&self, stability: f64) -> f64 {
+        (stability / Self::FACTOR * (self.request_retention.powf(1.0 / Self::DECAY) - 1.0))
             .round()
-            .clamp(1.0, self.maximum_interval as f64);
-        self.apply_fuzz(new_interval, elapsed_days)
+            .clamp(1.0, self.maximum_interval as f64)
     }
 
     pub(crate) fn next_difficulty(&self, difficulty: f64, rating: Rating) -> f64 {
@@ -107,22 +104,6 @@ impl Parameters {
 
     fn mean_reversion(&self, initial: f64, current: f64) -> f64 {
         self.w[7].mul_add(initial, (1.0 - self.w[7]) * current)
-    }
-
-    fn apply_fuzz(&self, interval: f64, elapsed_days: i64) -> f64 {
-        if !self.enable_fuzz || interval < 2.5 {
-            return interval;
-        }
-
-        let mut generator = Prng::new("RNG");
-        let fuzz_factor = generator.double();
-        let (min_interval, max_interval) =
-            FuzzRange::get_fuzz_range(interval, elapsed_days, self.maximum_interval);
-
-        fuzz_factor.mul_add(
-            max_interval as f64 - min_interval as f64 + 1.0,
-            min_interval as f64,
-        )
     }
 }
 

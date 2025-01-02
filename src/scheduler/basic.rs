@@ -46,8 +46,7 @@ impl Basic {
             Hard => (Duration::minutes(5), Learning),
             Good => (Duration::minutes(10), Learning),
             Easy => {
-                let easy_interval =
-                    p.next_interval(card.stability, card.elapsed_days(self.now)) as i64;
+                let easy_interval = p.next_interval(card.stability) as i64;
                 (Duration::days(easy_interval), Reviewing)
             }
         };
@@ -60,7 +59,6 @@ impl Basic {
     fn review_learning(&self, rating: Rating) -> Card {
         let p = &self.parameters;
         let last = &self.card;
-        let interval = self.card.elapsed_days(self.now);
 
         let mut card = Card {
             difficulty: p.next_difficulty(last.difficulty, rating),
@@ -73,15 +71,13 @@ impl Basic {
             Again => (Duration::minutes(5), last.state),
             Hard => (Duration::minutes(10), last.state),
             Good => {
-                let good_interval = p.next_interval(card.stability, interval) as i64;
+                let good_interval = p.next_interval(card.stability) as i64;
                 (Duration::days(good_interval), Reviewing)
             }
             Easy => {
                 let good_stability = p.short_term_stability(last.stability, Good);
-                let good_interval = p.next_interval(good_stability, interval);
-                let easy_interval = p
-                    .next_interval(card.stability, interval)
-                    .max(good_interval + 1.0) as i64;
+                let good_interval = p.next_interval(good_stability);
+                let easy_interval = p.next_interval(card.stability).max(good_interval + 1.0) as i64;
                 (Duration::days(easy_interval), Reviewing)
             }
         };
@@ -93,7 +89,6 @@ impl Basic {
 
     fn review_reviewing(&self, rating: Rating) -> Card {
         let p = &self.parameters;
-        let interval = self.card.elapsed_days(self.now);
         let stability = self.card.stability;
         let difficulty = self.card.difficulty;
         let retrievability = self.card.retrievability(p, self.now);
@@ -107,7 +102,7 @@ impl Basic {
             card.stability = p.next_stability(difficulty, stability, retrievability, rating);
         });
 
-        let interval = self.review_intervals(cards.map(|(_, card)| card.stability), interval);
+        let interval = self.review_intervals(cards.map(|(_, card)| card.stability));
 
         let mut card = cards[rating];
         card.due = self.now
@@ -119,17 +114,15 @@ impl Basic {
         card
     }
 
-    fn review_intervals(&self, stability: Cards<f64>, interval_previous: i64) -> Cards<i64> {
+    fn review_intervals(&self, stability: Cards<f64>) -> Cards<i64> {
         let p = &self.parameters;
         let mut interval = Cards::splat(0.0f64);
 
-        interval.hard = p.next_interval(stability.hard, interval_previous);
-        interval.good = p.next_interval(stability.good, interval_previous);
+        interval.hard = p.next_interval(stability.hard);
+        interval.good = p.next_interval(stability.good);
         interval.hard = interval.hard.min(interval.good);
         interval.good = interval.good.max(interval.hard + 1.0);
-        interval.easy = p
-            .next_interval(stability.easy, interval_previous)
-            .max(interval.good + 1.0);
+        interval.easy = p.next_interval(stability.easy).max(interval.good + 1.0);
 
         interval.map(|(_, i)| i as i64)
     }
