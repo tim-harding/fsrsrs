@@ -1,56 +1,12 @@
 # rs-fsrs
 
-![](https://github.com/open-spaced-repetition/rs-fsrs/actions/workflows/check.yml/badge.svg)
-
-A rust implementation of FSRS scheduler.
-
-Install:
-
-```toml
-[dependencies]
-rs-fsrs = { version = "1.2.1" }
-```
-
-Quickstart:
+A Rust implementation of the [FSRS](https://github.com/open-spaced-repetition/fsrs4anki/wiki/The-Algorithm) scheduler.
 
 ```rust
 use chrono::Utc;
-use rs_fsrs::{FSRS, Card, Rating};
+use rs_fsrs::{Fsrs, Parameters, Grade};
 
-fn main() {
-    let fsrs = FSRS::default();
-    let card = Card::new();
-
-    let record_log = fsrs.repeat(card, Utc::now());
-    for rating in Rating::iter() {
-        let item = record_log[rating].to_owned();
-        println!("{:?}", item.card);
-        println!("{:?}", item.review_log);
-    }
-}
+let fsrs = Fsrs::new(Parameters::default());
+let review_1 = fsrs.next_card(None, Utc::now(), Grade::Hard);
+let review_2 = fsrs.next_card(Some(review_1), Utc::now(), Grade::Good);
 ```
-
-## Development
-
-run
-
-```sh
-cargo fmt
-cargo clippy -- -D clippy::nursery
-cargo test --release
-```
-
-## Other implementation
-
-[fsrs-rs](https://github.com/open-spaced-repetition/fsrs-rs) contains a Rust API for training FSRS parameters, and for using them to schedule cards.
-
-## Bindings
-
-- [c/cpp](https://github.com/open-spaced-repetition/rs-fsrs-c)
-- [python](https://github.com/open-spaced-repetition/rs-fsrs-python)
-- [java](https://github.com/open-spaced-repetition/rs-fsrs-java)
-- [nodejs](https://github.com/open-spaced-repetition/rs-fsrs-nodejs)
-
-## LICENSE
-
-MIT
