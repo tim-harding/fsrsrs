@@ -1,11 +1,12 @@
 use crate::Parameters;
 use chrono::{DateTime, Utc};
 
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Card {
     pub reviewed_at: DateTime<Utc>,
     pub due: DateTime<Utc>,
+    pub rating: Rating,
     pub state: State,
     pub stability: f64,
     pub difficulty: f64,
@@ -13,10 +14,14 @@ pub struct Card {
 
 impl Card {
     pub fn new() -> Self {
+        let now = Utc::now();
         Self {
-            due: Utc::now(),
-            reviewed_at: Utc::now(),
-            ..Default::default()
+            reviewed_at: now,
+            due: now,
+            rating: Rating::Again,
+            state: State::New,
+            stability: 0.0,
+            difficulty: 0.0,
         }
     }
 
@@ -29,6 +34,12 @@ impl Card {
 
     pub fn retrievability(&self, parameters: &Parameters, now: DateTime<Utc>) -> f64 {
         parameters.forgetting_curve(self.elapsed_days(now) as f64, self.stability)
+    }
+}
+
+impl Default for Card {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
