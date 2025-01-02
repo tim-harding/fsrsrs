@@ -1,11 +1,13 @@
 use crate::{ParametersBuilder, Rating};
 
-pub(crate) type Weights = [f64; 19];
+/// FSRS algorithm weights
+pub type Weights = [f64; 19];
 
+/// FSRS algorithm parameters
 #[derive(Debug, Copy, Clone, PartialEq, PartialOrd)]
 pub struct Parameters {
     pub(crate) w: Weights,
-    pub(crate) request_retention: f64,
+    pub(crate) retention: f64,
     pub(crate) maximum_interval: i32,
 }
 
@@ -33,7 +35,7 @@ impl Parameters {
     }
 
     pub(crate) fn next_interval(&self, stability: f64) -> f64 {
-        (stability / Self::FACTOR * (self.request_retention.powf(1.0 / Self::DECAY) - 1.0))
+        (stability / Self::FACTOR * (self.retention.powf(1.0 / Self::DECAY) - 1.0))
             .round()
             .clamp(1.0, self.maximum_interval as f64)
     }
