@@ -1,17 +1,13 @@
 [package]
-name = "rs-fsrs"
-version = "1.2.1"
+name = "fsrsrs"
+version = "0.1.0"
 edition = "2021"
-license-file = "LICENSE"
-description = "Rust-based Scheduler for FSRS"
-
+license = "LICENSE"
+description = "Rust-based FSRS scheduler"
 
 [dependencies]
 chrono = { version = "0.4.23", features = ["serde"] }
 serde = { version = "1.0", features = ["derive"], optional = true }
-
-[dev-dependencies]
-rand = "0.8.5"
 
 [features]
 serde = ["dep:serde"]

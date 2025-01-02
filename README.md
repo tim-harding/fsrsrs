@@ -1,10 +1,10 @@
-# rs-fsrs
+# fsrsrs
 
 A Rust implementation of the [FSRS](https://github.com/open-spaced-repetition/fsrs4anki/wiki/The-Algorithm) scheduler.
 
 ```rust
 use chrono::Utc;
-use rs_fsrs::{Fsrs, Parameters, Grade};
+use fsrsrs::{Fsrs, Parameters, Grade};
 
 let fsrs = Fsrs::new(Parameters::default());
 let review_1 = fsrs.next_card(None, Utc::now(), Grade::Hard);
