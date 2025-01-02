@@ -22,16 +22,22 @@ impl ParametersBuilder {
 
     pub fn request_retention(mut self, request_retention: Option<f64>) -> Self {
         self.request_retention = request_retention;
+    pub fn retention(mut self, request_retention: f64) -> Self {
+        self.retention = Some(request_retention);
         self
     }
 
     pub fn maximum_interval(mut self, maximum_interval: Option<i32>) -> Self {
         self.maximum_interval = maximum_interval;
+    pub fn maximum_interval(mut self, maximum_interval: i32) -> Self {
+        self.maximum_interval = Some(maximum_interval);
         self
     }
 
     pub fn weights(mut self, weights: Option<Weights>) -> Self {
         self.w = weights;
+    pub fn weights(mut self, weights: Weights) -> Self {
+        self.w = Some(weights);
         self
     }
 }
