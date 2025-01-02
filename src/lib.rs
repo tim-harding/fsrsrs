@@ -3,8 +3,8 @@ mod cards;
 mod fsrs;
 pub use fsrs::Fsrs;
 
-mod models;
-pub use models::{Card, Rating};
+mod card;
+pub use card::{Card, Rating};
 
 mod parameters;
 pub use parameters::Parameters;

@@ -40,7 +40,7 @@ impl Fsrs {
 
 #[cfg(test)]
 mod tests {
-    use crate::models::Rating;
+    use crate::card::Rating;
     use crate::{parameters::Parameters, Fsrs};
     use chrono::{DateTime, TimeZone, Utc};
 
