@@ -26,160 +26,87 @@ impl Longterm {
     }
 
     fn review_new(&self, rating: Rating) -> Card {
+        let p = &self.0.parameters;
         let mut next = self.0.current;
+
         next.scheduled_days = 0;
         next.elapsed_days = 0;
+        next.stability = p.init_stability(rating);
+        next.difficulty = p.init_difficulty(rating);
+        next.state = Reviewing;
 
-        let mut next_again = next;
-        let mut next_hard = next;
-        let mut next_good = next;
-        let mut next_easy = next;
-
-        self.init_difficulty_stability(
-            &mut next_again,
-            &mut next_hard,
-            &mut next_good,
-            &mut next_easy,
-        );
-        self.next_interval(
-            &mut next_again,
-            &mut next_hard,
-            &mut next_good,
-            &mut next_easy,
+        let interval = self.next_interval(
+            p.init_stability(Again),
+            p.init_stability(Hard),
+            p.init_stability(Good),
+            p.init_stability(Easy),
             0,
+            rating,
         );
-        next_again.state = Reviewing;
-        next_hard.state = Reviewing;
-        next_good.state = Reviewing;
-        next_easy.state = Reviewing;
+        next.scheduled_days = interval;
+        next.due = self.0.now + Duration::days(interval);
 
-        match rating {
-            Again => next_again,
-            Hard => next_hard,
-            Good => next_good,
-            Easy => next_easy,
-        }
+        next
     }
 
     fn review_reviewing(&self, rating: Rating) -> Card {
-        let next = self.0.current;
+        let p = &self.0.parameters;
+        let mut next = self.0.current;
         let interval = self.0.current.elapsed_days;
         let stability = self.0.last.stability;
         let difficulty = self.0.last.difficulty;
         let retrievability = self.0.last.retrievability(&self.0.parameters, self.0.now);
 
-        let mut next_again = next;
-        let mut next_hard = next;
-        let mut next_good = next;
-        let mut next_easy = next;
+        next.difficulty = p.next_difficulty(difficulty, rating);
+        next.stability = p.next_stability(difficulty, stability, retrievability, rating);
+        next.state = Reviewing;
 
-        self.next_difficulty_stability(
-            &mut next_again,
-            &mut next_hard,
-            &mut next_good,
-            &mut next_easy,
-            difficulty,
-            stability,
-            retrievability,
-        );
-        self.next_interval(
-            &mut next_again,
-            &mut next_hard,
-            &mut next_good,
-            &mut next_easy,
-            interval,
-        );
-        next_again.state = Reviewing;
-        next_hard.state = Reviewing;
-        next_good.state = Reviewing;
-        next_easy.state = Reviewing;
-        next_again.lapses += 1;
-
-        match rating {
-            Again => next_again,
-            Hard => next_hard,
-            Good => next_good,
-            Easy => next_easy,
+        if rating == Again {
+            next.lapses += 1;
         }
-    }
 
-    fn init_difficulty_stability(
-        &self,
-        next_again: &mut Card,
-        next_hard: &mut Card,
-        next_good: &mut Card,
-        next_easy: &mut Card,
-    ) {
-        let p = &self.0.parameters;
-        next_again.difficulty = p.init_difficulty(Again);
-        next_again.stability = p.init_stability(Again);
+        let interval = self.next_interval(
+            p.next_stability(difficulty, stability, retrievability, Again),
+            p.next_stability(difficulty, stability, retrievability, Hard),
+            p.next_stability(difficulty, stability, retrievability, Good),
+            p.next_stability(difficulty, stability, retrievability, Easy),
+            interval,
+            rating,
+        );
 
-        next_hard.difficulty = p.init_difficulty(Hard);
-        next_hard.stability = p.init_stability(Hard);
+        next.scheduled_days = interval;
+        next.due = self.0.now + Duration::days(interval);
 
-        next_good.difficulty = p.init_difficulty(Good);
-        next_good.stability = p.init_stability(Good);
-
-        next_easy.difficulty = p.init_difficulty(Easy);
-        next_easy.stability = p.init_stability(Easy);
-    }
-
-    #[allow(clippy::too_many_arguments)]
-    fn next_difficulty_stability(
-        &self,
-        next_again: &mut Card,
-        next_hard: &mut Card,
-        next_good: &mut Card,
-        next_easy: &mut Card,
-        difficulty: f64,
-        stability: f64,
-        retrievability: f64,
-    ) {
-        let p = &self.0.parameters;
-
-        next_again.difficulty = p.next_difficulty(difficulty, Again);
-        next_again.stability = p.next_forget_stability(difficulty, stability, retrievability);
-
-        next_hard.difficulty = p.next_difficulty(difficulty, Hard);
-        next_hard.stability = p.next_recall_stability(difficulty, stability, retrievability, Hard);
-
-        next_good.difficulty = p.next_difficulty(difficulty, Good);
-        next_good.stability = p.next_recall_stability(difficulty, stability, retrievability, Good);
-
-        next_easy.difficulty = p.next_difficulty(difficulty, Easy);
-        next_easy.stability = p.next_recall_stability(difficulty, stability, retrievability, Easy);
+        next
     }
 
     fn next_interval(
         &self,
-        next_again: &mut Card,
-        next_hard: &mut Card,
-        next_good: &mut Card,
-        next_easy: &mut Card,
+        stability_again: f64,
+        stability_hard: f64,
+        stability_good: f64,
+        stability_easy: f64,
         elapsed_days: i64,
-    ) {
+        rating: Rating,
+    ) -> i64 {
         let p = &self.0.parameters;
-        let mut again_interval = p.next_interval(next_again.stability, elapsed_days);
-        let mut hard_interval = p.next_interval(next_hard.stability, elapsed_days);
-        let mut good_interval = p.next_interval(next_good.stability, elapsed_days);
-        let mut easy_interval = p.next_interval(next_easy.stability, elapsed_days);
+
+        let mut again_interval = p.next_interval(stability_again, elapsed_days);
+        let mut hard_interval = p.next_interval(stability_hard, elapsed_days);
+        let mut good_interval = p.next_interval(stability_good, elapsed_days);
+        let mut easy_interval = p.next_interval(stability_easy, elapsed_days);
 
         again_interval = again_interval.min(hard_interval);
         hard_interval = hard_interval.max(again_interval + 1.0);
         good_interval = good_interval.max(hard_interval + 1.0);
         easy_interval = easy_interval.max(good_interval + 1.0);
 
-        next_again.scheduled_days = again_interval as i64;
-        next_again.due = self.0.now + Duration::days(again_interval as i64);
-
-        next_hard.scheduled_days = hard_interval as i64;
-        next_hard.due = self.0.now + Duration::days(hard_interval as i64);
-
-        next_good.scheduled_days = good_interval as i64;
-        next_good.due = self.0.now + Duration::days(good_interval as i64);
-
-        next_easy.scheduled_days = easy_interval as i64;
-        next_easy.due = self.0.now + Duration::days(easy_interval as i64);
+        (match rating {
+            Again => again_interval,
+            Hard => hard_interval,
+            Good => good_interval,
+            Easy => easy_interval,
+        }) as i64
     }
 }
 
