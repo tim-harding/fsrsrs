@@ -7,7 +7,6 @@ pub struct Parameters {
     pub(crate) w: Weights,
     pub(crate) request_retention: f64,
     pub(crate) maximum_interval: i32,
-    pub(crate) enable_short_term: bool,
 }
 
 impl Parameters {

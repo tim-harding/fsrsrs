@@ -73,7 +73,6 @@ mod tests {
     fn longterm() {
         let params = Parameters {
             w: WEIGHTS,
-            enable_short_term: false,
             ..Default::default()
         };
 
