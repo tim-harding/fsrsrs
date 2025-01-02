@@ -1,26 +1,23 @@
-use crate::{
-    Card,
-    Rating::{self, *},
-};
+use crate::Rating::{self, *};
 
-pub struct Cards {
-    pub again: Card,
-    pub hard: Card,
-    pub good: Card,
-    pub easy: Card,
+pub struct Cards<T: Copy> {
+    pub again: T,
+    pub hard: T,
+    pub good: T,
+    pub easy: T,
 }
 
-impl Cards {
-    pub fn new(card: Card) -> Self {
+impl<T: Copy> Cards<T> {
+    pub fn new(t: T) -> Self {
         Self {
-            again: card,
-            hard: card,
-            good: card,
-            easy: card,
+            again: t,
+            hard: t,
+            good: t,
+            easy: t,
         }
     }
 
-    pub fn get(self, rating: Rating) -> Card {
+    pub fn get(self, rating: Rating) -> T {
         match rating {
             Again => self.again,
             Hard => self.hard,
@@ -29,15 +26,15 @@ impl Cards {
         }
     }
 
-    pub fn into_array(self) -> [Card; 4] {
+    pub fn into_array(self) -> [T; 4] {
         [self.again, self.hard, self.good, self.easy]
     }
 
-    pub fn as_array_ref(&self) -> [&Card; 4] {
+    pub fn as_array(&self) -> [&T; 4] {
         [&self.again, &self.hard, &self.good, &self.easy]
     }
 
-    pub fn as_array_mut(&mut self) -> [&mut Card; 4] {
+    pub fn as_array_mut(&mut self) -> [&mut T; 4] {
         [
             &mut self.again,
             &mut self.hard,
@@ -46,7 +43,7 @@ impl Cards {
         ]
     }
 
-    pub fn map(self, f: impl Fn((Rating, Card)) -> Card) -> Self {
+    pub fn map(self, f: impl Fn((Rating, T)) -> T) -> Self {
         Self {
             again: f((Again, self.again)),
             hard: f((Hard, self.hard)),
@@ -55,7 +52,7 @@ impl Cards {
         }
     }
 
-    pub fn update(&mut self, f: impl Fn((Rating, &mut Card))) {
+    pub fn update(&mut self, f: impl Fn((Rating, &mut T))) {
         f((Again, &mut self.again));
         f((Hard, &mut self.hard));
         f((Good, &mut self.good));
@@ -63,30 +60,30 @@ impl Cards {
     }
 }
 
-impl IntoIterator for Cards {
-    type Item = Card;
+impl<T: Copy> IntoIterator for Cards<T> {
+    type Item = T;
 
-    type IntoIter = std::array::IntoIter<Card, 4>;
+    type IntoIter = std::array::IntoIter<Self::Item, 4>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.into_array().into_iter()
     }
 }
 
-impl<'a> IntoIterator for &'a Cards {
-    type Item = &'a Card;
+impl<'a, T: Copy> IntoIterator for &'a Cards<T> {
+    type Item = &'a T;
 
-    type IntoIter = std::array::IntoIter<&'a Card, 4>;
+    type IntoIter = std::array::IntoIter<Self::Item, 4>;
 
     fn into_iter(self) -> Self::IntoIter {
-        self.as_array_ref().into_iter()
+        self.as_array().into_iter()
     }
 }
 
-impl<'a> IntoIterator for &'a mut Cards {
-    type Item = &'a mut Card;
+impl<'a, T: Copy> IntoIterator for &'a mut Cards<T> {
+    type Item = &'a mut T;
 
-    type IntoIter = std::array::IntoIter<&'a mut Card, 4>;
+    type IntoIter = std::array::IntoIter<Self::Item, 4>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.as_array_mut().into_iter()
