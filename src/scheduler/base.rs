@@ -1,4 +1,4 @@
-use crate::{Card, Parameters, Rating, Review};
+use crate::{Card, Parameters};
 use chrono::{DateTime, Utc};
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
@@ -19,22 +19,6 @@ impl Base {
             previous: card,
             current,
             now,
-        }
-    }
-
-    pub fn current_review(self, rating: Rating, card: Card) -> Review {
-        let Self {
-            now: reviewed_date,
-            current: Card { state, .. },
-            ..
-        } = self;
-
-        Review {
-            rating,
-            state,
-            elapsed_days: card.elapsed_days(self.now),
-            scheduled_days: (card.due - self.now).num_days(),
-            reviewed_date,
         }
     }
 }

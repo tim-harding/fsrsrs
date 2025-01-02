@@ -1,5 +1,5 @@
 use crate::Parameters;
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, Duration, Utc};
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -25,11 +25,23 @@ impl Card {
         }
     }
 
-    pub fn elapsed_days(&self, now: DateTime<Utc>) -> i64 {
+    pub fn elapsed(&self, now: DateTime<Utc>) -> Duration {
         match self.state {
-            State::New => 0,
-            _ => now.signed_duration_since(self.reviewed_at).num_days(),
+            State::New => Duration::zero(),
+            _ => now.signed_duration_since(self.reviewed_at),
         }
+    }
+
+    pub fn elapsed_days(&self, now: DateTime<Utc>) -> i64 {
+        self.elapsed(now).num_days()
+    }
+
+    pub fn scheduled(&self) -> Duration {
+        self.due - self.reviewed_at
+    }
+
+    pub fn scheduled_days(&self) -> i64 {
+        self.scheduled().num_days()
     }
 
     pub fn retrievability(&self, parameters: &Parameters, now: DateTime<Utc>) -> f64 {
@@ -50,22 +62,6 @@ pub enum Rating {
     Hard = 2,
     Good = 3,
     Easy = 4,
-}
-
-#[derive(Clone, Debug, PartialEq, Eq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Review {
-    pub rating: Rating,
-    pub elapsed_days: i64,
-    pub scheduled_days: i64,
-    pub state: State,
-    pub reviewed_date: DateTime<Utc>,
-}
-
-#[derive(Debug, Clone)]
-pub struct Schedule {
-    pub card: Card,
-    pub review: Review,
 }
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]

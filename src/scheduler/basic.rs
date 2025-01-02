@@ -3,7 +3,6 @@ use crate::{
     cards::Cards,
     Card, Parameters,
     Rating::{self, *},
-    Review,
     State::{self, *},
 };
 use chrono::{DateTime, Duration, Utc};
@@ -21,10 +20,6 @@ impl Basic {
             Learning | Relearning => self.review_learning(rating),
             Reviewing => self.review_reviewing(rating),
         }
-    }
-
-    pub fn current_review(&self, rating: Rating, card: Card) -> Review {
-        self.0.current_review(rating, card)
     }
 
     fn review_new(&self, rating: Rating) -> Card {
@@ -149,8 +144,7 @@ mod tests {
         for rating in TEST_RATINGS.into_iter() {
             let scheduler = Basic::new(Parameters::default(), card, now);
             card = scheduler.next_card(rating);
-            let review = scheduler.current_review(rating, card);
-            interval_history.push(review.scheduled_days);
+            interval_history.push(card.scheduled_days());
             now = card.due;
         }
         let expected = [0, 4, 15, 48, 136, 351, 0, 0, 7, 13, 24, 43, 77];
@@ -169,10 +163,9 @@ mod tests {
         let mut state_list = vec![];
 
         for rating in TEST_RATINGS.into_iter() {
+            state_list.push(card.state);
             let scheduler = Basic::new(params, card, now);
             card = scheduler.next_card(rating);
-            let rev_log = scheduler.current_review(rating, card);
-            state_list.push(rev_log.state);
             now = card.due;
         }
         use State::*;

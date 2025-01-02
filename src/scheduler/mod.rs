@@ -2,7 +2,7 @@ mod base;
 mod basic;
 mod longterm;
 
-use crate::{Card, Parameters, Rating, Review, Schedule};
+use crate::{Card, Parameters, Rating};
 use basic::Basic;
 use chrono::{DateTime, Utc};
 use longterm::Longterm;
@@ -22,21 +22,6 @@ impl Scheduler {
         match &self.0 {
             Inner::Basic(basic) => basic.next_card(rating),
             Inner::Longterm(longterm) => longterm.next_card(rating),
-        }
-    }
-
-    pub fn current_review(&self, rating: Rating, card: Card) -> Review {
-        match &self.0 {
-            Inner::Basic(basic) => basic.current_review(rating, card),
-            Inner::Longterm(longterm) => longterm.current_review(rating, card),
-        }
-    }
-
-    pub fn schedule(&self, rating: Rating) -> Schedule {
-        let card = self.next_card(rating);
-        Schedule {
-            card,
-            review: self.current_review(rating, card),
         }
     }
 }

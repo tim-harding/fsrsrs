@@ -1,5 +1,5 @@
 use super::base::Base;
-use crate::{cards::Cards, Card, Parameters, Rating, Review, State::*};
+use crate::{cards::Cards, Card, Parameters, Rating, State::*};
 use chrono::{DateTime, Duration, Utc};
 
 pub struct Longterm(Base);
@@ -14,10 +14,6 @@ impl Longterm {
             New => self.review_new(rating),
             Learning | Relearning | Reviewing => self.review_reviewing(rating),
         }
-    }
-
-    pub fn current_review(&self, rating: Rating, card: Card) -> Review {
-        self.0.current_review(rating, card)
     }
 
     fn review_new(&self, rating: Rating) -> Card {
@@ -102,9 +98,8 @@ mod tests {
         for rating in TEST_RATINGS.into_iter() {
             let scheduler = Longterm::new(params, card, now);
             card = scheduler.next_card(rating);
-            let review = scheduler.current_review(rating, card);
 
-            interval_history.push(review.scheduled_days);
+            interval_history.push(card.scheduled_days());
             stability_history.push(card.stability.round_float(4));
             difficulty_history.push(card.difficulty.round_float(4));
             now = card.due;
