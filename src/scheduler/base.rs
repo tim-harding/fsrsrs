@@ -12,7 +12,7 @@ pub struct Base {
 impl Base {
     pub fn new(parameters: Parameters, card: Card, now: DateTime<Utc>) -> Self {
         let mut current = card;
-        current.last_review = now;
+        current.reviewed_at = now;
 
         Self {
             parameters,
