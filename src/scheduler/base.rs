@@ -35,13 +35,4 @@ impl Base {
             reviewed_date: self.now,
         }
     }
-
-    // TODO: Unconditionally clobbers user-provided seed
-    #[allow(unused)]
-    fn init_seed(&mut self) -> String {
-        let time = self.now.timestamp_millis();
-        let reps = self.current.reps;
-        let mul = self.current.difficulty * self.current.stability;
-        format!("{}_{}_{}", time, reps, mul)
-    }
 }

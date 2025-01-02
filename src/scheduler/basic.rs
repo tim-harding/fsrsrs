@@ -39,7 +39,7 @@ impl Basic {
             Hard => (0, Duration::minutes(5), Learning),
             Good => (0, Duration::minutes(10), Learning),
             Easy => {
-                let easy_interval = p.next_interval(card.stability, card.elapsed_days, "") as i64;
+                let easy_interval = p.next_interval(card.stability, card.elapsed_days) as i64;
                 (easy_interval, Duration::days(easy_interval), Reviewing)
             }
         };
@@ -63,14 +63,14 @@ impl Basic {
             Again => (Duration::minutes(5), last.state),
             Hard => (Duration::minutes(10), last.state),
             Good => {
-                let good_interval = p.next_interval(card.stability, interval, "") as i64;
+                let good_interval = p.next_interval(card.stability, interval) as i64;
                 (Duration::days(good_interval), Reviewing)
             }
             Easy => {
                 let good_stability = p.short_term_stability(last.stability, Good);
-                let good_interval = p.next_interval(good_stability, interval, "");
+                let good_interval = p.next_interval(good_stability, interval);
                 let easy_interval = p
-                    .next_interval(card.stability, interval, "")
+                    .next_interval(card.stability, interval)
                     .max(good_interval + 1.0) as i64;
                 (Duration::days(easy_interval), Reviewing)
             }
@@ -114,12 +114,12 @@ impl Basic {
         let p = &self.0.parameters;
         let mut interval = Cards::splat(0.0f64);
 
-        interval.hard = p.next_interval(stability.hard, interval_previous, "");
-        interval.good = p.next_interval(stability.good, interval_previous, "");
+        interval.hard = p.next_interval(stability.hard, interval_previous);
+        interval.good = p.next_interval(stability.good, interval_previous);
         interval.hard = interval.hard.min(interval.good);
         interval.good = interval.good.max(interval.hard + 1.0);
         interval.easy = p
-            .next_interval(stability.easy, interval_previous, "")
+            .next_interval(stability.easy, interval_previous)
             .max(interval.good + 1.0);
 
         interval.map(|(_, i)| i as i64)

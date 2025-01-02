@@ -36,12 +36,12 @@ impl Parameters {
         self.w[(rating_int - 1) as usize].max(0.1)
     }
 
-    pub(crate) fn next_interval(&self, stability: f64, elapsed_days: i64, seed: &str) -> f64 {
+    pub(crate) fn next_interval(&self, stability: f64, elapsed_days: i64) -> f64 {
         let new_interval = (stability / Self::FACTOR
             * (self.request_retention.powf(1.0 / Self::DECAY) - 1.0))
             .round()
             .clamp(1.0, self.maximum_interval as f64);
-        self.apply_fuzz(new_interval, elapsed_days, seed)
+        self.apply_fuzz(new_interval, elapsed_days)
     }
 
     pub(crate) fn next_difficulty(&self, difficulty: f64, rating: Rating) -> f64 {
@@ -109,12 +109,12 @@ impl Parameters {
         self.w[7].mul_add(initial, (1.0 - self.w[7]) * current)
     }
 
-    fn apply_fuzz(&self, interval: f64, elapsed_days: i64, seed: &str) -> f64 {
+    fn apply_fuzz(&self, interval: f64, elapsed_days: i64) -> f64 {
         if !self.enable_fuzz || interval < 2.5 {
             return interval;
         }
 
-        let mut generator = Prng::new(seed);
+        let mut generator = Prng::new("RNG");
         let fuzz_factor = generator.double();
         let (min_interval, max_interval) =
             FuzzRange::get_fuzz_range(interval, elapsed_days, self.maximum_interval);
