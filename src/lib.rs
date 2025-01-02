@@ -4,7 +4,7 @@ mod fsrs;
 pub use fsrs::Fsrs;
 
 mod models;
-pub use models::{Card, Rating, State};
+pub use models::{Card, Rating};
 
 mod parameters;
 pub use parameters::Parameters;

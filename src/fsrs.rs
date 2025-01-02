@@ -1,4 +1,4 @@
-use crate::{Card, Parameters, Rating, State::*};
+use crate::{Card, Parameters, Rating};
 use chrono::{DateTime, Duration, Utc};
 
 #[derive(Debug, Default, Clone)]
@@ -11,21 +11,21 @@ impl Fsrs {
         Self { parameters }
     }
 
-    pub fn next_card(&self, card: Card, now: DateTime<Utc>, rating: Rating) -> Card {
+    pub fn next_card(&self, card: Option<Card>, now: DateTime<Utc>, rating: Rating) -> Card {
         let p = &self.parameters;
-        let Card {
-            stability,
-            difficulty,
-            state,
-            ..
-        } = card;
 
-        let (difficulty, stability) = match state {
-            New => (p.init_difficulty(rating), p.init_stability(rating)),
-            Learning | Relearning | Reviewing => (
+        let (difficulty, stability) = if let Some(card) = card {
+            let Card {
+                stability,
+                difficulty,
+                ..
+            } = card;
+            (
                 p.next_difficulty(difficulty, rating),
                 p.next_stability(difficulty, stability, card.retrievability(p, now), rating),
-            ),
+            )
+        } else {
+            (p.init_difficulty(rating), p.init_stability(rating))
         };
 
         Card {
@@ -34,7 +34,6 @@ impl Fsrs {
             rating,
             reviewed_at: now,
             interval: Duration::days(p.next_interval(stability) as i64),
-            state: Reviewing,
         }
     }
 }
@@ -42,7 +41,7 @@ impl Fsrs {
 #[cfg(test)]
 mod tests {
     use crate::models::Rating;
-    use crate::{models::Card, parameters::Parameters, Fsrs};
+    use crate::{parameters::Parameters, Fsrs};
     use chrono::{DateTime, TimeZone, Utc};
 
     pub const TEST_RATINGS: [Rating; 13] = [
@@ -89,7 +88,7 @@ mod tests {
             ..Default::default()
         };
 
-        let mut card = Card::new();
+        let mut card = None;
         let mut now = string_to_utc("2022-11-29 12:30:00 +0000 UTC");
         let mut interval_history = vec![];
         let mut stability_history = vec![];
@@ -97,8 +96,8 @@ mod tests {
 
         for rating in TEST_RATINGS.into_iter() {
             let scheduler = Fsrs::new(params);
-            card = scheduler.next_card(card, now, rating);
-
+            card = Some(scheduler.next_card(card, now, rating));
+            let card = card.unwrap();
             interval_history.push(card.interval.num_days());
             stability_history.push(card.stability.round_float(4));
             difficulty_history.push(card.difficulty.round_float(4));

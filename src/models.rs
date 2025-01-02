@@ -7,7 +7,6 @@ pub struct Card {
     pub reviewed_at: DateTime<Utc>,
     pub interval: Duration,
     pub rating: Rating,
-    pub state: State,
     pub stability: f64,
     pub difficulty: f64,
 }
@@ -18,7 +17,6 @@ impl Card {
             reviewed_at: DateTime::default(),
             interval: Duration::zero(),
             rating: Rating::Again,
-            state: State::New,
             stability: 0.0,
             difficulty: 0.0,
         }
@@ -29,10 +27,7 @@ impl Card {
     }
 
     pub fn elapsed(&self, now: DateTime<Utc>) -> Duration {
-        match self.state {
-            State::New => Duration::zero(),
-            _ => now.signed_duration_since(self.reviewed_at),
-        }
+        now.signed_duration_since(self.reviewed_at)
     }
 
     pub fn elapsed_days(&self, now: DateTime<Utc>) -> i64 {
@@ -57,14 +52,4 @@ pub enum Rating {
     Hard = 2,
     Good = 3,
     Easy = 4,
-}
-
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum State {
-    #[default]
-    New = 0,
-    Learning = 1,
-    Reviewing = 2,
-    Relearning = 3,
 }
