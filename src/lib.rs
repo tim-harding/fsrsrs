@@ -1,7 +1,7 @@
 mod cards;
 
 mod fsrs;
-pub use fsrs::Fsrs;
+pub use fsrs::{Fsrs, Review};
 
 mod card;
 pub use card::{Card, Grade};
