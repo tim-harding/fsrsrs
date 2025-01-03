@@ -3,14 +3,12 @@ use chrono::{DateTime, Duration, Utc};
 
 /// The FSRS algorithm
 #[derive(Debug, Default, Clone)]
-pub struct Fsrs {
-    parameters: Parameters,
-}
+pub struct Fsrs(Parameters);
 
 impl Fsrs {
     /// Create a new [Fsrs] with the given parameters
     pub const fn new(parameters: Parameters) -> Self {
-        Self { parameters }
+        Self(parameters)
     }
 
     /// Compute the new state after a review
@@ -21,7 +19,7 @@ impl Fsrs {
     /// - `now`: The time the card is reviewed
     /// - `grade`: The difficulty of the review
     pub fn next_card(&self, card: Option<Card>, now: DateTime<Utc>, grade: Grade) -> Card {
-        let p = &self.parameters;
+        let p = &self.0;
 
         let (difficulty, stability) = if let Some(card) = card {
             let Card {
