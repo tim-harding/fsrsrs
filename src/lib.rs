@@ -14,3 +14,6 @@ pub use parameters_builder::ParametersBuilder;
 
 #[doc = include_str!("../README.md")]
 mod readme {}
+
+pub type Time = chrono::DateTime<chrono::Utc>;
+pub use chrono::Duration;

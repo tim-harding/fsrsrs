@@ -1,5 +1,4 @@
-use crate::{Card, Grade, Parameters};
-use chrono::{DateTime, Duration, Utc};
+use crate::{Card, Duration, Grade, Parameters, Time};
 
 /// The FSRS algorithm
 #[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd)]
@@ -18,7 +17,7 @@ impl Fsrs {
     /// - `card`: The card being reviewed, or None if it's the first review
     /// - `now`: The time the card is reviewed
     /// - `grade`: The difficulty of the review
-    pub fn next_card(&self, card: Option<Card>, now: DateTime<Utc>, grade: Grade) -> Card {
+    pub fn next_card(&self, card: Option<Card>, now: Time, grade: Grade) -> Card {
         let p = &self.0;
 
         let (difficulty, stability) = if let Some(card) = card {
@@ -62,19 +61,19 @@ pub struct Review {
     /// Difficulty of the review
     pub grade: Grade,
     /// When the review took place
-    pub when: DateTime<Utc>,
+    pub when: Time,
 }
 
 impl Review {
     /// Create a new review
-    pub fn new(grade: Grade, when: DateTime<Utc>) -> Self {
+    pub fn new(grade: Grade, when: Time) -> Self {
         Self { grade, when }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::{Fsrs, Grade, Parameters};
+    use crate::{Fsrs, Grade, Parameters, Time};
     use chrono::{DateTime, TimeZone, Utc};
 
     pub const TEST_GRADES: [Grade; 13] = [
@@ -98,7 +97,7 @@ mod tests {
         2.0225, 0.0904, 0.3025, 2.1214, 0.2498, 2.9466, 0.4891, 0.6468,
     ];
 
-    pub fn string_to_utc(date_string: &str) -> DateTime<Utc> {
+    pub fn string_to_utc(date_string: &str) -> Time {
         let datetime = DateTime::parse_from_str(date_string, "%Y-%m-%d %H:%M:%S %z %Z").unwrap();
         Utc.from_local_datetime(&datetime.naive_utc()).unwrap()
     }

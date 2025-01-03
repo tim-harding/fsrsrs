@@ -1,6 +1,5 @@
-use std::ops::{Index, IndexMut};
-
 use crate::Grade::{self, *};
+use std::ops::{Index, IndexMut};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Cards<T: Copy> {
