@@ -2,7 +2,7 @@ use crate::{Card, Grade, Parameters};
 use chrono::{DateTime, Duration, Utc};
 
 /// The FSRS algorithm
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd)]
 pub struct Fsrs(Parameters);
 
 impl Fsrs {
@@ -74,8 +74,7 @@ impl Review {
 
 #[cfg(test)]
 mod tests {
-    use crate::card::Grade;
-    use crate::{parameters::Parameters, Fsrs};
+    use crate::{Fsrs, Grade, Parameters};
     use chrono::{DateTime, TimeZone, Utc};
 
     pub const TEST_GRADES: [Grade; 13] = [
