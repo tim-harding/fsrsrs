@@ -58,13 +58,17 @@ impl Fsrs {
     }
 }
 
+/// Information about a card review
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Review {
+    /// Difficulty of the review
     pub grade: Grade,
+    /// When the review took place
     pub when: DateTime<Utc>,
 }
 
 impl Review {
+    /// Create a new review
     pub fn new(grade: Grade, when: DateTime<Utc>) -> Self {
         Self { grade, when }
     }
