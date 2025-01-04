@@ -42,33 +42,6 @@ impl Fsrs {
             interval: Duration::days(p.next_interval(stability) as i64),
         }
     }
-
-    /// Compute the new state after the given reviews
-    ///
-    /// Returns None when the iterator produces no values.
-    pub fn reviewed(&self, reviews: impl IntoIterator<Item = Review>) -> Option<Card> {
-        let mut card = None;
-        for review in reviews.into_iter() {
-            card = Some(self.next_card(card, review.when, review.grade));
-        }
-        card
-    }
-}
-
-/// Information about a card review
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct Review {
-    /// Difficulty of the review
-    pub grade: Grade,
-    /// When the review took place
-    pub when: Time,
-}
-
-impl Review {
-    /// Create a new review
-    pub fn new(grade: Grade, when: Time) -> Self {
-        Self { grade, when }
-    }
 }
 
 #[cfg(test)]
