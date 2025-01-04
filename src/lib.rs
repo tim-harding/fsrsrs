@@ -1,5 +1,4 @@
 mod algo;
-mod cards;
 
 mod fsrs;
 pub use fsrs::Fsrs;
