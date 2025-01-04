@@ -1,6 +1,6 @@
 [package]
 name = "fsrsrs"
-version = "0.2.1"
+version = "1.0.0"
 edition = "2021"
 license-file = "LICENSE"
 description = "Rust-based FSRS scheduler"
