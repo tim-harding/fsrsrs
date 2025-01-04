@@ -3,6 +3,7 @@ use crate::{to_days, Duration, Grade, Time};
 /// The state of FSRS after a review
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub struct Card {
     /// When the card was last reviewed
     pub when: Time,
