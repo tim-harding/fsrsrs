@@ -9,13 +9,14 @@ pub enum Grade {
     Easy,
 }
 
-impl From<Grade> for f64 {
-    fn from(g: Grade) -> f64 {
-        match g {
-            Grade::Fail => 1.0,
-            Grade::Hard => 2.0,
-            Grade::Good => 3.0,
-            Grade::Easy => 4.0,
+impl Grade {
+    pub(crate) fn into_f64(self) -> f64 {
+        use Grade::*;
+        match self {
+            Fail => 1.0,
+            Hard => 2.0,
+            Good => 3.0,
+            Easy => 4.0,
         }
     }
 }

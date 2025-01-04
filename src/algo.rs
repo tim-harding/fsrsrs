@@ -64,7 +64,7 @@ fn clamp_d(d: D) -> D {
 }
 
 pub fn d_0(g: Grade) -> D {
-    let g: f64 = g.into();
+    let g: f64 = g.into_f64();
     clamp_d(W[4] - f64::exp(W[5] * (g - 1.0)) + 1.0)
 }
 
@@ -77,6 +77,6 @@ fn dp(d: D, g: Grade) -> f64 {
 }
 
 fn delta_d(g: Grade) -> f64 {
-    let g: f64 = g.into();
+    let g: f64 = g.into_f64();
     -W[6] * (g - 3.0)
 }
