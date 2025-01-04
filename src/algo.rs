@@ -1,35 +1,16 @@
+use crate::Grade;
+
 pub const W: [f64; 19] = [
     0.40255, 1.18385, 3.173, 15.69105, 7.1949, 0.5345, 1.4604, 0.0046, 1.54575, 0.1192, 1.01925,
     1.9395, 0.11, 0.29605, 2.2698, 0.2315, 2.9898, 0.51655, 0.6621,
 ];
+const F: f64 = 19.0 / 81.0;
+const C: f64 = -0.5;
 
 pub type R = f64;
 pub type S = f64;
 pub type D = f64;
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub enum Grade {
-    Forgot,
-    Hard,
-    Good,
-    Easy,
-}
-
-impl From<Grade> for f64 {
-    fn from(g: Grade) -> f64 {
-        match g {
-            Grade::Forgot => 1.0,
-            Grade::Hard => 2.0,
-            Grade::Good => 3.0,
-            Grade::Easy => 4.0,
-        }
-    }
-}
-
 pub type T = f64;
-
-const F: f64 = 19.0 / 81.0;
-const C: f64 = -0.5;
 
 pub fn retrievability(t: T, s: S) -> R {
     (1.0 + F * (t / s)).powf(C)

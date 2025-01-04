@@ -1,5 +1,7 @@
 mod algo;
-pub use algo::Grade;
+
+mod grade;
+pub use grade::Grade;
 
 mod fsrs;
 pub use fsrs::review;
