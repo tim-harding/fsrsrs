@@ -1,3 +1,4 @@
+mod algo;
 mod cards;
 
 mod fsrs;
