@@ -1,4 +1,4 @@
-use crate::Grade;
+use crate::Grade::{self, *};
 
 pub const W: [f64; 19] = [
     0.40255, 1.18385, 3.173, 15.69105, 7.1949, 0.5345, 1.4604, 0.0046, 1.54575, 0.1192, 1.01925,
@@ -24,10 +24,10 @@ pub fn interval(r_d: R, s: S) -> T {
 
 pub fn s_0(g: Grade) -> S {
     match g {
-        Grade::Fail => W[0],
-        Grade::Hard => W[1],
-        Grade::Good => W[2],
-        Grade::Easy => W[3],
+        Fail => W[0],
+        Hard => W[1],
+        Good => W[2],
+        Easy => W[3],
     }
 }
 
@@ -35,8 +35,8 @@ fn s_success(d: D, s: S, r: R, g: Grade) -> S {
     let t_d = 11.0 - d;
     let t_s = s.powf(-W[9]);
     let t_r = f64::exp(W[10] * (1.0 - r)) - 1.0;
-    let h = if g == Grade::Hard { W[15] } else { 1.0 };
-    let b = if g == Grade::Easy { W[16] } else { 1.0 };
+    let h = if g == Hard { W[15] } else { 1.0 };
+    let b = if g == Easy { W[16] } else { 1.0 };
     let c = f64::exp(W[8]);
     let alpha = 1.0 + t_d * t_s * t_r * h * b * c;
     s * alpha
@@ -52,7 +52,7 @@ fn s_fail(d: D, s: S, r: R) -> S {
 }
 
 pub fn stability(d: D, s: S, r: R, g: Grade) -> S {
-    if g == Grade::Fail {
+    if g == Fail {
         s_fail(d, s, r)
     } else {
         s_success(d, s, r, g)
@@ -69,7 +69,7 @@ pub fn d_0(g: Grade) -> D {
 }
 
 pub fn difficulty(d: D, g: Grade) -> D {
-    clamp_d(W[7] * d_0(Grade::Easy) + (1.0 - W[7]) * dp(d, g))
+    clamp_d(W[7] * d_0(Easy) + (1.0 - W[7]) * dp(d, g))
 }
 
 fn dp(d: D, g: Grade) -> f64 {
