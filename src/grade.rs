@@ -3,7 +3,7 @@
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub enum Grade {
-    Forgot,
+    Fail,
     Hard,
     Good,
     Easy,
@@ -12,7 +12,7 @@ pub enum Grade {
 impl From<Grade> for f64 {
     fn from(g: Grade) -> f64 {
         match g {
-            Grade::Forgot => 1.0,
+            Grade::Fail => 1.0,
             Grade::Hard => 2.0,
             Grade::Good => 3.0,
             Grade::Easy => 4.0,

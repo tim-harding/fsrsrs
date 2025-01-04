@@ -24,7 +24,7 @@ pub fn interval(r_d: R, s: S) -> T {
 
 pub fn s_0(g: Grade) -> S {
     match g {
-        Grade::Forgot => W[0],
+        Grade::Fail => W[0],
         Grade::Hard => W[1],
         Grade::Good => W[2],
         Grade::Easy => W[3],
@@ -52,7 +52,7 @@ fn s_fail(d: D, s: S, r: R) -> S {
 }
 
 pub fn stability(d: D, s: S, r: R, g: Grade) -> S {
-    if g == Grade::Forgot {
+    if g == Grade::Fail {
         s_fail(d, s, r)
     } else {
         s_success(d, s, r, g)
