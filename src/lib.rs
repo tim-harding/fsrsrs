@@ -14,12 +14,7 @@ mod readme {}
 
 use chrono::{DateTime, Duration, Utc};
 
-pub type Time = DateTime<Utc>;
-
-/// Get the current [Time]
-pub fn now() -> Time {
-    Utc::now()
-}
+type Time = DateTime<Utc>;
 
 const SEC_PER_DAY: f64 = 60.0 * 60.0 * 24.0;
 
