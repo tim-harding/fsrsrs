@@ -6,4 +6,8 @@ license-file = "LICENSE"
 description = "Rust-based FSRS scheduler"
 
 [dependencies]
-chrono = { version = "0.4.23" }
+chrono = { version = "0.4.23", features = ["serde"] }
+serde = { version = "1.0", features = ["derive"], optional = true }
+
+[features]
+serde = ["dep:serde"]
