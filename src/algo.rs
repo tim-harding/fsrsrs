@@ -7,7 +7,7 @@ pub type R = f64;
 pub type S = f64;
 pub type D = f64;
 
-#[derive(Clone, Copy, PartialEq, Debug)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Grade {
     Forgot,
     Hard,
@@ -35,6 +35,8 @@ pub fn retrievability(t: T, s: S) -> R {
     (1.0 + F * (t / s)).powf(C)
 }
 
+// r_d ~ requested retention, and I(r,S)=S when r=0.9
+#[allow(unused)]
 pub fn interval(r_d: R, s: S) -> T {
     (s / F) * (r_d.powf(1.0 / C) - 1.0)
 }

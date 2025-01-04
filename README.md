@@ -4,9 +4,8 @@ A Rust implementation of the [FSRS](https://github.com/open-spaced-repetition/fs
 
 ```rust
 use chrono::Utc;
-use fsrsrs::{Fsrs, Parameters, Grade};
+use fsrsrs::{Grade, review};
 
-let fsrs = Fsrs::new(Parameters::default());
-let review_1 = fsrs.next_card(None, Utc::now(), Grade::Hard);
-let review_2 = fsrs.next_card(Some(review_1), Utc::now(), Grade::Good);
+let card_1 = review(None, Utc::now(), Grade::Hard);
+let card_2 = review(Some(card_1), Utc::now(), Grade::Good);
 ```
