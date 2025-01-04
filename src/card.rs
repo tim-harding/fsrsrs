@@ -6,7 +6,7 @@ use crate::{to_days, Duration, Grade, Time};
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub struct Card {
     /// When the card was last reviewed
-    pub when: Time,
+    pub reviewed_at: Time,
     /// Time interval from the last review for the next review
     pub due: Time,
     /// Difficulty rating of the review
@@ -20,7 +20,7 @@ pub struct Card {
 impl Card {
     /// Amount of time passed since the last review
     fn elapsed(&self, now: Time) -> Duration {
-        now.signed_duration_since(self.when)
+        now.signed_duration_since(self.reviewed_at)
     }
 
     /// Amount of time in days since the last review
