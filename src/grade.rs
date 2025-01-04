@@ -1,3 +1,4 @@
+/// Difficulty of a review
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Grade {
     Forgot,
