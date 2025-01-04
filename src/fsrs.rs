@@ -1,6 +1,4 @@
-use crate::{algo, Card, Duration, Grade, Time};
-
-const SEC_PER_DAY: f64 = 60.0 * 60.0 * 24.0;
+use crate::{algo, from_days, Card, Grade, Time};
 
 /// Compute the new FSRS card state after a review
 ///
@@ -35,6 +33,6 @@ pub fn review(card: Option<Card>, now: Time, grade: Grade) -> Card {
         stability,
         grade,
         when: now,
-        due: now + Duration::seconds((stability * SEC_PER_DAY) as i64),
+        due: now + from_days(stability),
     }
 }
