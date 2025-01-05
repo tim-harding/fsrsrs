@@ -31,7 +31,6 @@ pub fn review(card: Option<Card>, now: Time, grade: Grade) -> Card {
     Card {
         difficulty,
         stability,
-        grade,
         reviewed_at: now,
         due: now + from_days(stability),
     }

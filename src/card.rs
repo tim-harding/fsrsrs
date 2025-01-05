@@ -1,4 +1,4 @@
-use crate::{to_days, Duration, Grade, Time};
+use crate::{to_days, Duration, Time};
 
 /// The state of FSRS after a review
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
@@ -9,8 +9,6 @@ pub struct Card {
     pub reviewed_at: Time,
     /// Time interval from the last review for the next review
     pub due: Time,
-    /// Difficulty rating of the review
-    pub grade: Grade,
     /// FSRS memory stability after the review
     pub stability: f64,
     /// FSRS memory difficulty after the review
